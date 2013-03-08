@@ -9,8 +9,10 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
+#include "helper.h"
 #include "mainwindow.h"
 #include "particle.h"
+
 
 static int init(int argc, char **argv);
 static void init_callbacks(void);
@@ -60,10 +62,21 @@ static int init(int argc, char **argv)
     return 0;
 }
 
+static void animate()
+{
+    for (int i = 0; i < NUM_PARTICLES; i++)
+    {
+        particles[i].x += get_random_float(-1.1f, 1.0f);
+        particles[i].y += get_random_float(-1.1f, 1.0f);
+    }
+    glutPostRedisplay();
+}
+
 static void init_callbacks()
 {
     glutDisplayFunc(render_scene_cb);
     glutKeyboardFunc(keyboard);
+    glutIdleFunc(animate);
 }
 
 void keyboard(unsigned char key, int x, int y)

@@ -14,6 +14,8 @@
 #include "helper.h"
 #include "mainwindow.h"
 
+#define STEP_SIZE (0.01f)
+
 static void init(void);
 
 static struct Particle *particles;
@@ -28,16 +30,11 @@ void particle_draw(struct Particle *particle)
 {
     glBegin(GL_LINE_LOOP);
     glColor4f(particle->color.r, particle->color.g, particle->color.b, particle->color.a);
-    for (float i = 0; i <= (2 * M_PI) + 0.01; i += 0.01)
+    for (float i = 0; i <= (2 * M_PI) + STEP_SIZE; i += STEP_SIZE)
     {
         glVertex2f(particle->x + (sin(i) * particle->r), particle->y + (cos(i) * particle->r));
     }
     glEnd();
-}
-
-int get_num_particles()
-{
-    return NUM_PARTICLES;
 }
 
 static void init(void)
@@ -47,7 +44,7 @@ static void init(void)
     particles = malloc(NUM_PARTICLES * size_of);
     for (idx = 0; idx < NUM_PARTICLES; idx++)
     {
-        const float r = get_random_float(10.0f, 25.0f);
+        const float r = get_random_float(5.0f, 10.0f);
         particles[idx].x = get_random_float(0.0f + r, WIN_WIDTH_F - r);
         particles[idx].y = get_random_float(0.0f + r, WIN_HEIGHT_F - r);
         particles[idx].r = r;
