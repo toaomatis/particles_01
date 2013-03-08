@@ -8,6 +8,8 @@
 #ifndef PARTICLE_H_
 #define PARTICLE_H_
 
+#define NUM_PARTICLES (10)
+
 struct Particle
 {
     float x;
@@ -17,6 +19,6 @@ struct Particle
 
 struct Particle* particle();
 int get_num_particles(void);
-void draw_particles(void);
+void particle_draw(struct Particle *particle);
 
 #endif /* PARTICLE_H_ */

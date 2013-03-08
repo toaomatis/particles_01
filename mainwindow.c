@@ -17,6 +17,7 @@ static void render_scene_cb(void);
 static void create_vertex_buffer(void);
 
 static GLuint VBO;
+static struct Particle *particles;
 
 void mainwindow(int argc, char **argv)
 {
@@ -49,7 +50,7 @@ static int init(int argc, char **argv)
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-    create_vertex_buffer();
+    particles = particle();
 
     return 0;
 }
@@ -71,15 +72,16 @@ static void render_scene_cb()
 
     glDisableVertexAttribArray(0);
 #endif
-    draw_particles();
+    for (int i = 0; i < NUM_PARTICLES; i++)
+    {
+        particle_draw(&(particles[i]));
+    }
 
     glutSwapBuffers();
 }
 
 static void create_vertex_buffer()
 {
-    struct Particle *particles = particle();
-    int size = get_num_particles();
 #if 0
     glGenBuffers(size, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);

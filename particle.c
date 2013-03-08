@@ -12,8 +12,6 @@
 
 #include "particle.h"
 
-#define NUM_PARTICLES (10)
-
 static void init(void);
 
 static struct Particle *particles;
@@ -24,14 +22,16 @@ struct Particle* particle()
     return particles;
 }
 
-void particle_draw(struct Particle particle)
+void particle_draw(struct Particle *particle)
 {
     glBegin(GL_LINE_LOOP);
-    glVertex2f(particle.x, particle.y);
-    float r = 0.1;
-    for (float i = 0; i <= (2 * M_PI) + 0.01; i += 0.01)
+    const double angle = (2 * M_PI) / 100.0f;
+    double angle1=0.0;
+    glVertex2d(cos(0.0f), sin(0.0f));
+    for (int i = 0; i < 100; i++)
     {
-        glVertex2f(particle.x + sin(i) * r, particle.y + cos(i) * r);
+        glVertex2d(cos(angle1),sin(angle1));
+        angle1 += angle;
     }
     glEnd();
 }
