@@ -47,8 +47,13 @@ static int init(int argc, char **argv)
         fprintf(stderr, "Error: '%s'\n", glewGetErrorString(res));
         return -1;
     }
-
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0.0f, 1024.0f, 768.0f, 0.0f, 0.0f, 1.0f);
+    glMatrixMode(GL_MODELVIEW);
+    glDisable(GL_DEPTH_TEST);
 
     particles = particle();
 
@@ -62,7 +67,10 @@ static void init_callbacks()
 
 static void render_scene_cb()
 {
+
+
     glClear(GL_COLOR_BUFFER_BIT);
+
 #if 0
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);

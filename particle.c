@@ -25,13 +25,11 @@ struct Particle* particle()
 void particle_draw(struct Particle *particle)
 {
     glBegin(GL_LINE_LOOP);
-    const double angle = (2 * M_PI) / 100.0f;
-    double angle1=0.0;
-    glVertex2d(cos(0.0f), sin(0.0f));
-    for (int i = 0; i < 100; i++)
+    //glVertex2f(particle->x, particle->y);
+    const float r = 0.1;
+    for (float i = 0; i <= (2 * M_PI) + 0.01; i += 0.01)
     {
-        glVertex2d(cos(angle1),sin(angle1));
-        angle1 += angle;
+        glVertex2f(particle->x + sin(i) * r, particle->y + cos(i) * r);
     }
     glEnd();
 }
@@ -53,8 +51,8 @@ static void init(void)
         particles[idx].y = 0.0f;
         particles[idx].z = 0.0f;
 #endif
-        particles[idx].x = (float)idx;
-        particles[idx].y = (float)idx;
-        particles[idx].z = (float)idx;
+        particles[idx].x = (float) idx / (float) NUM_PARTICLES;
+        particles[idx].y = (float) idx / (float) NUM_PARTICLES;
+        particles[idx].z = (float) idx / (float) NUM_PARTICLES;
     }
 }
