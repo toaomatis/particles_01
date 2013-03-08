@@ -8,13 +8,22 @@
 #ifndef PARTICLE_H_
 #define PARTICLE_H_
 
-#define NUM_PARTICLES (10)
+#define NUM_PARTICLES (100)
+
+struct Color
+{
+    float r;
+    float g;
+    float b;
+    float a;
+};
 
 struct Particle
 {
     float x;
     float y;
     float r;
+    struct Color color;
 };
 
 struct Particle* particle();

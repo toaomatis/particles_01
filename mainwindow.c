@@ -9,6 +9,7 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
+#include "mainwindow.h"
 #include "particle.h"
 
 static int init(int argc, char **argv);
@@ -33,7 +34,7 @@ static int init(int argc, char **argv)
     GLenum res;
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-    glutInitWindowSize(1024, 768);
+    glutInitWindowSize(WIN_WIDTH_I, WIN_HEIGHT_I);
     glutInitWindowPosition(100, 100);
     glutCreateWindow("Tutorial 01");
 
@@ -50,7 +51,7 @@ static int init(int argc, char **argv)
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0.0f, 1024.0f, 768.0f, 0.0f, 0.0f, 1.0f);
+    glOrtho(0.0f, WIN_WIDTH_F, WIN_HEIGHT_F, 0.0f, 0.0f, 1.0f);
     glMatrixMode(GL_MODELVIEW);
     glDisable(GL_DEPTH_TEST);
 

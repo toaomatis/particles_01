@@ -7,11 +7,9 @@
 
 #include <stdlib.h>
 
-float get_random_float()
+float get_random_float(const float min, const float max)
 {
-    const float min_val = 10.0f;
-    const float max_val = 25.0f;
-    const float delta = max_val - min_val;
-    float value = min_val + (((float) rand() / RAND_MAX) * delta);
+    const float delta = max - min;
+    float value = min + (((float) rand() / RAND_MAX) * delta);
     return value;
 }
