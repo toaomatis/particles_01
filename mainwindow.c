@@ -64,10 +64,17 @@ static int init(int argc, char **argv)
 
 static void animate()
 {
-    for (int i = 0; i < NUM_PARTICLES; i++)
+    for (int idx = 0; idx < NUM_PARTICLES; idx++)
     {
-        particles[i].x += get_random_float(-1.1f, 1.0f);
-        particles[i].y += get_random_float(-1.1f, 1.0f);
+        for(int ndx = idx + 1; ndx < NUM_PARTICLES; ndx++)
+        {
+            particle_interact(&(particles[idx]), &(particles[ndx]));
+        }
+
+    }
+    for (int idx = 0; idx < NUM_PARTICLES; idx++)
+    {
+        particle_move(&(particles[idx]));
     }
     glutPostRedisplay();
 }

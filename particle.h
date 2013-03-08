@@ -10,6 +10,11 @@
 
 #define NUM_PARTICLES (100)
 
+enum BOUNDS
+{
+    WRAP, BOUNCE, NONE
+};
+
 struct Color
 {
     float r;
@@ -20,13 +25,24 @@ struct Color
 
 struct Particle
 {
+    int alive;
+    int hit;
     float x;
     float y;
     float r;
+    float m;
+    float vx;
+    float vy;
     struct Color color;
 };
 
+#define CONST_BOUND (WRAP)
+#define CONST_MASS_GRAVITY (0.05f)
+#define CONST_MASS (1.5f)
+
 struct Particle* particle();
 void particle_draw(struct Particle *particle);
+int particle_interact(struct Particle *a, struct Particle *b);
+int particle_move(struct Particle *a);
 
 #endif /* PARTICLE_H_ */
