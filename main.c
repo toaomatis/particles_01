@@ -13,7 +13,5 @@ int main(int argc, char **argv)
 {
     mainwindow(argc, argv);
 
-    glutMainLoop();
-
     return 0;
 }

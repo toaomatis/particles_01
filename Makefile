@@ -1,4 +1,4 @@
-SOURCES = main.c mainwindow.c
+SOURCES = main.c mainwindow.c particle.c
 OBJS = ${SOURCES:.c=.o}
 
 DEBUG_CFLAGS = -O0 -g
@@ -9,7 +9,7 @@ LIBS =  -lglut -lGLEW
 
 EXE_NAME = particles_01
 
-all: clean $(EXE_NAME)
+all: $(EXE_NAME)
 
 
 $(EXE_NAME): $(OBJS)

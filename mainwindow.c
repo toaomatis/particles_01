@@ -9,17 +9,28 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
-static void init(int argc, char **argv);
+#include "particle.h"
+
+static int init(int argc, char **argv);
 static void init_callbacks(void);
 static void render_scene_cb(void);
+static void create_vertex_buffer(void);
+
+static GLuint VBO;
 
 void mainwindow(int argc, char **argv)
 {
-    init(argc, argv);
+    int init_result = init(argc, argv);
+    if (init_result != 0)
+    {
+        fprintf(stderr, "Init was unsuccessful. Quitting '\n");
+    }
+    glutMainLoop();
 }
 
-static void init(int argc, char **argv)
+static int init(int argc, char **argv)
 {
+    GLenum res;
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowSize(1024, 768);
@@ -28,7 +39,19 @@ static void init(int argc, char **argv)
 
     init_callbacks();
 
+    // Must be done after glut is initialized!
+    res = glewInit();
+    if (res != GLEW_OK)
+    {
+        fprintf(stderr, "Error: '%s'\n", glewGetErrorString(res));
+        return -1;
+    }
+
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+    create_vertex_buffer();
+
+    return 0;
 }
 
 static void init_callbacks()
@@ -39,5 +62,22 @@ static void init_callbacks()
 static void render_scene_cb()
 {
     glClear(GL_COLOR_BUFFER_BIT);
+
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glDrawArrays(GL_POINTS, 0, 1);
+
+    glDisableVertexAttribArray(0);
+
     glutSwapBuffers();
+}
+
+static void create_vertex_buffer()
+{
+    struct Particle *particles = particle();
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(struct Particle), particles, GL_STATIC_DRAW);
 }
