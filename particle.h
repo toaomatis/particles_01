@@ -16,5 +16,7 @@ struct Particle
 };
 
 struct Particle* particle();
+int get_num_particles(void);
+void draw_particles(void);
 
 #endif /* PARTICLE_H_ */
