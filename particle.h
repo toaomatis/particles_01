@@ -14,7 +14,7 @@ struct Particle
 {
     float x;
     float y;
-    float z;
+    float r;
 };
 
 struct Particle* particle();

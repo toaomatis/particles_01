@@ -25,11 +25,9 @@ struct Particle* particle()
 void particle_draw(struct Particle *particle)
 {
     glBegin(GL_LINE_LOOP);
-    //glVertex2f(particle->x, particle->y);
-    const float r = 0.1;
     for (float i = 0; i <= (2 * M_PI) + 0.01; i += 0.01)
     {
-        glVertex2f(particle->x + sin(i) * r, particle->y + cos(i) * r);
+        glVertex2f(particle->x + sin(i) * particle->r, particle->y + cos(i) * particle->r);
     }
     glEnd();
 }
@@ -46,13 +44,8 @@ static void init(void)
     particles = malloc(NUM_PARTICLES * size_of);
     for (idx = 0; idx < NUM_PARTICLES; idx++)
     {
-#if 0
-        particles[idx].x = 0.0f;
-        particles[idx].y = 0.0f;
-        particles[idx].z = 0.0f;
-#endif
-        particles[idx].x = (float) idx / (float) NUM_PARTICLES;
-        particles[idx].y = (float) idx / (float) NUM_PARTICLES;
-        particles[idx].z = (float) idx / (float) NUM_PARTICLES;
+        particles[idx].x = (float) idx * 50.0f;
+        particles[idx].y = (float) idx * 50.0f;
+        particles[idx].r = (float) idx;
     }
 }
