@@ -21,4 +21,3 @@ $(EXE_NAME): $(OBJS)
 clean:
 	rm -f $(OBJS)
 	rm -f $(EXE_NAME)
-	rm -f testcairo

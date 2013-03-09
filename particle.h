@@ -8,8 +8,6 @@
 #ifndef PARTICLE_H_
 #define PARTICLE_H_
 
-#define NUM_PARTICLES (100)
-
 enum BOUNDS
 {
     WRAP, BOUNCE, NONE
@@ -36,9 +34,15 @@ struct Particle
     struct Color color;
 };
 
-#define CONST_BOUND (WRAP)
-#define CONST_MASS_GRAVITY (0.05f)
-#define CONST_MASS (1.5f)
+extern const enum BOUNDS CONST_BOUND;
+extern const float CONST_MASS_GRAVITY;
+extern const float CONST_MASS;
+extern const float CONST_SPEED;
+extern const double CONST_RESTITUTION;
+extern const double CONST_VMIN;
+extern const int CONST_COLLISION;
+extern const float CONST_GRAVITY;
+extern const int NUM_PARTICLES;
 
 struct Particle* particle();
 void particle_draw(struct Particle *particle);
