@@ -24,7 +24,7 @@ const float CONST_SPEED = 0.0f;
 const double CONST_RESTITUTION = 0.85f;
 const double CONST_VMIN = 1E-20;
 const int CONST_COLLISION = 1;
-const int NUM_PARTICLES = 100;
+const int NUM_PARTICLES = 1000;
 
 static void init(void);
 
@@ -123,7 +123,7 @@ int particle_interact(struct Particle *a, struct Particle *b)
                 return true;
             }
             else
-                #endif
+#endif
             if (h > 1e-10)
             {
                 /* Compute the elastic collision of two particles */
@@ -280,7 +280,7 @@ static void init(void)
     particles = malloc(NUM_PARTICLES * size_of);
     for (idx = 0; idx < NUM_PARTICLES; idx++)
     {
-        const float r = get_random_float(5.0f, 10.0f);
+        const float r = get_random_float(2.0f, 5.0f);
         particles[idx].x = get_random_float(0.0f + r, WIN_WIDTH_F - r);
         particles[idx].y = get_random_float(0.0f + r, WIN_HEIGHT_F - r);
         particles[idx].r = r;
