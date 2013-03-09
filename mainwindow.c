@@ -5,8 +5,10 @@
  *      Author: mathijs
  */
 
-#include <stdio.h>
+#include <curses.h>
 #include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -23,6 +25,14 @@ static void keyboard(unsigned char key, int x, int y);
 
 static struct Particle *particles;
 static pthread_t worker_thread;
+static int win_num = -1;
+
+enum STATES
+{
+    RUNNING, PAUSED, STOPPED
+};
+
+enum STATES state = RUNNING;
 
 void mainwindow(int argc, char **argv)
 {
@@ -42,7 +52,7 @@ static int init(int argc, char **argv)
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowSize(WIN_WIDTH_I, WIN_HEIGHT_I);
     glutInitWindowPosition(100, 100);
-    glutCreateWindow("Tutorial 01");
+    win_num = glutCreateWindow("Tutorial 01");
 
     init_callbacks();
 
@@ -70,21 +80,27 @@ static int init(int argc, char **argv)
 
 static void worker(void *ptr)
 {
-    while (1)
+    while (state != STOPPED)
     {
-        for (int idx = 0; idx < NUM_PARTICLES; idx++)
+        if (state == RUNNING)
         {
-            for (int ndx = idx + 1; ndx < NUM_PARTICLES; ndx++)
+            for (int idx = 0; idx < NUM_PARTICLES; idx++)
             {
-                particle_interact(&(particles[idx]), &(particles[ndx]));
-            }
+                for (int ndx = idx + 1; ndx < NUM_PARTICLES; ndx++)
+                {
+                    particle_interact(&(particles[idx]), &(particles[ndx]));
+                }
 
+            }
+            for (int idx = 0; idx < NUM_PARTICLES; idx++)
+            {
+                particle_move(&(particles[idx]));
+            }
         }
-        for (int idx = 0; idx < NUM_PARTICLES; idx++)
+        else
         {
-            particle_move(&(particles[idx]));
+            usleep(1000);
         }
-        usleep(10000);
     }
     pthread_exit(0); /* exit */
 } /* print_message_function ( void *ptr ) */
@@ -104,7 +120,30 @@ static void init_callbacks()
 
 static void keyboard(unsigned char key, int x, int y)
 {
-    exit(0);
+    switch(key)
+    {
+        case '\e': /* ESC */
+        {
+            state = STOPPED;
+            glutIdleFunc(NULL);
+            glutDestroyWindow(win_num);
+        }break;
+        case ' ':
+        {
+            if(state == RUNNING)
+            {
+                state = PAUSED;
+            }
+            else
+            {
+                state = RUNNING;
+            }
+        }break;
+        default:
+        {
+
+        }break;
+    }
 }
 
 static void render_scene_cb()
