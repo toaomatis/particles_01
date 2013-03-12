@@ -32,7 +32,7 @@ enum STATES
     RUNNING, PAUSED, STOPPED
 };
 
-enum STATES state = RUNNING;
+enum STATES state = PAUSED;
 
 void mainwindow(int argc, char **argv)
 {
@@ -107,7 +107,6 @@ static void worker(void *ptr)
 
 static void animate()
 {
-
     glutPostRedisplay();
 }
 
@@ -152,6 +151,9 @@ static void render_scene_cb()
     for (int i = 0; i < NUM_PARTICLES; i++)
     {
         particle_draw(&(particles[i]));
+#if TRACE
+        particle_draw_trace(&(particles[i]));
+#endif
     }
     glutSwapBuffers();
 }

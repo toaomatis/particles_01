@@ -4,6 +4,7 @@
  *  Created on: Mar 8, 2013
  *      Author: mathijs
  */
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -16,7 +17,7 @@
 
 #define STEP_SIZE (0.01f)
 
-const enum BOUNDS CONST_BOUND = BOUNCE;
+const enum BOUNDS CONST_BOUND = NONE;
 const float CONST_MASS_GRAVITY = 0.05f;
 const float CONST_GRAVITY = 0.00f;
 const float CONST_MASS = 1.5f;
@@ -24,7 +25,8 @@ const float CONST_SPEED = 0.0f;
 const double CONST_RESTITUTION = 0.85f;
 const double CONST_VMIN = 1E-20;
 const int CONST_COLLISION = 1;
-const int NUM_PARTICLES = 2000;
+const int NUM_PARTICLES = 100;
+const int TRACE_LENGTH = 100;
 
 static void init(void);
 
@@ -36,19 +38,29 @@ struct Particle* particle()
     return particles;
 }
 
-void particle_draw(struct Particle *particle)
+void particle_draw(struct Particle *a)
 {
+#if MUTEX
+    pthread_mutex_lock(&(a->mutex));
+#endif
     glBegin(GL_LINE_LOOP);
-    glColor4f(particle->color.r, particle->color.g, particle->color.b, particle->color.a);
+    glColor4f(a->color.r, a->color.g, a->color.b, a->color.a);
     for (float i = 0; i <= (2 * M_PI) + STEP_SIZE; i += STEP_SIZE)
     {
-        glVertex2f(particle->x + (sin(i) * particle->r), particle->y + (cos(i) * particle->r));
+        glVertex2f(a->x + (sin(i) * a->r), a->y + (cos(i) * a->r));
     }
     glEnd();
+#if MUTEX
+    pthread_mutex_unlock(&(a->mutex));
+#endif
 }
 
 int particle_interact(struct Particle *a, struct Particle *b)
 {
+#if MUTEX
+    pthread_mutex_lock(&(a->mutex));
+    pthread_mutex_lock(&(b->mutex));
+#endif
     if ((a->alive != 1) || (b->alive != 1))
     {
         return -1;
@@ -140,12 +152,21 @@ int particle_interact(struct Particle *a, struct Particle *b)
                 r2 = b->vx * q - b->vy * p;
                 if (v1 < v2)
                 {
+#if MUTEX
+                    pthread_mutex_unlock(&(b->mutex));
+                    pthread_mutex_unlock(&(a->mutex));
+#endif
+
                     return 0;
                 }
                 /* Combine mass */
                 s = a->m + b->m;
                 if (s == 0)
                 {
+#if MUTEX
+                    pthread_mutex_unlock(&(b->mutex));
+                    pthread_mutex_unlock(&(a->mutex));
+#endif
                     return 0;
                 }
                 t = (v1 * a->m + v2 * b->m) / s;
@@ -169,11 +190,18 @@ int particle_interact(struct Particle *a, struct Particle *b)
         b->vx -= dv * p;
         b->vy -= dv * q;
     }
+#if MUTEX
+    pthread_mutex_unlock(&(b->mutex));
+    pthread_mutex_unlock(&(a->mutex));
+#endif
     return 0;
 }
 
 int particle_move(struct Particle *a)
 {
+#if MUTEX
+    pthread_mutex_lock(&(a->mutex));
+#endif
     a->x += a->vx;
     a->y += a->vy;
     if (CONST_BOUND != NONE)
@@ -270,7 +298,42 @@ int particle_move(struct Particle *a)
         a->vy += CONST_GRAVITY;
     }
     a->hit = 0;
+#if TRACE
+    a->trace[a->trace_idx].x = a->x;
+    a->trace[a->trace_idx].y = a->y;
+    a->trace[a->trace_idx].init = 1;
+    a->trace_idx = (a->trace_idx + 1) % TRACE_LENGTH;
+#endif
+#if MUTEX
+    pthread_mutex_unlock(&(a->mutex));
+#endif
     return 0;
+}
+
+void particle_draw_trace(struct Particle *a)
+{
+#if MUTEX
+    pthread_mutex_lock(&(a->mutex));
+#endif
+#if TRACE
+    int idx;
+    glBegin(GL_POINTS);
+    glColor4f(a->color.r, a->color.g, a->color.b, a->color.a);
+    for (idx = 0; idx < TRACE_LENGTH; idx++)
+    {
+        int trace_idx = (a->trace_idx + idx) % TRACE_LENGTH;
+        if (a->trace[trace_idx].init != 0)
+        {
+            float x = a->trace[trace_idx].x;
+            float y = a->trace[trace_idx].y;
+            glVertex2f(x, y);
+        }
+    }
+    glEnd();
+#endif
+#if MUTEX
+    pthread_mutex_unlock(&(a->mutex));
+#endif
 }
 
 static void init(void)
@@ -293,6 +356,19 @@ static void init(void)
         particles[idx].color.a = 1.0f;
         particles[idx].alive = 1;
         particles[idx].hit = 0;
+#if TRACE
+        particles[idx].trace_idx = 0;
+        particles[idx].trace = malloc(TRACE_LENGTH * sizeof(struct Particle_Trace));
+        for (int ndx = 0; ndx < TRACE_LENGTH; ndx++)
+        {
+            particles[idx].trace[ndx].x = -1.0f;
+            particles[idx].trace[ndx].y = -1.0f;
+            particles[idx].trace[ndx].init = 0;
+        }
+#endif
+#if MUTEX
+        pthread_mutex_init(&(particles[idx].mutex), NULL );
+#endif
         printf("[%d] x %4.2f y %4.2f r %4.2f Cr %4.2f Cg %4.2f Cb %4.2f Ca %4.2f \n", idx, particles[idx].x, particles[idx].y,
                 particles[idx].r, particles[idx].color.r, particles[idx].color.g, particles[idx].color.b, particles[idx].color.a);
     }
