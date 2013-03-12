@@ -8,10 +8,12 @@
 #ifndef MAINWINDOW_H_
 #define MAINWINDOW_H_
 
-#define WIN_WIDTH_I     (1024)
-#define WIN_HEIGHT_I    (768)
-#define WIN_WIDTH_F     ((float)WIN_WIDTH_I)
-#define WIN_HEIGHT_F    ((float)WIN_HEIGHT_I)
+#define MUTEX_COND (0)
+
+extern const int WIN_WIDTH_I;
+extern const int WIN_HEIGHT_I;
+extern const float WIN_WIDTH_F;
+extern const float WIN_HEIGHT_F;
 
 void mainwindow(int argc, char **argv);
 

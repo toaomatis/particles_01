@@ -17,12 +17,22 @@
 #include "mainwindow.h"
 #include "particle.h"
 
+const int WIN_WIDTH_I = 1024;
+const int WIN_HEIGHT_I = 768;
+const float WIN_WIDTH_F = 1024.0f;
+const float WIN_HEIGHT_F = 768.0f;
+
 static int init(int argc, char **argv);
 static void init_callbacks(void);
 static void render_scene_cb(void);
 static void worker(void *ptr);
 static void keyboard(unsigned char key, int x, int y);
 
+#if MUTEX_COND
+static pthread_cond_t paint_cond = PTHREAD_COND_INITIALIZER;
+static pthread_cond_t render_cond = PTHREAD_COND_INITIALIZER;
+static pthread_mutex_t paint_mutex = PTHREAD_MUTEX_INITIALIZER;
+#endif
 static struct Particle *particles;
 static pthread_t worker_thread;
 static int win_num = -1;
@@ -32,7 +42,13 @@ enum STATES
     RUNNING, PAUSED, STOPPED
 };
 
+enum TRACES
+{
+    ON, OFF
+};
+
 enum STATES state = PAUSED;
+enum TRACES traces = ON;
 
 void mainwindow(int argc, char **argv)
 {
@@ -80,8 +96,14 @@ static int init(int argc, char **argv)
 
 static void worker(void *ptr)
 {
+#if MUTEX_COND
+    pthread_mutex_lock(&(paint_mutex));
+#endif
     while (state != STOPPED)
     {
+#if MUTEX_COND
+        pthread_cond_wait(&(render_cond), &(paint_mutex));
+#endif
         if (state == RUNNING)
         {
             for (int idx = 0; idx < NUM_PARTICLES; idx++)
@@ -90,24 +112,33 @@ static void worker(void *ptr)
                 {
                     particle_interact(&(particles[idx]), &(particles[ndx]));
                 }
-
             }
             for (int idx = 0; idx < NUM_PARTICLES; idx++)
             {
                 particle_move(&(particles[idx]));
             }
         }
-        else
-        {
-            usleep(1000);
-        }
+#if MUTEX_COND
+        pthread_cond_signal(&(paint_cond));
+#endif
     }
+#if MUTEX_COND
+    pthread_mutex_unlock(&(paint_mutex));
+#endif
     pthread_exit(0); /* exit */
 } /* print_message_function ( void *ptr ) */
 
 static void animate()
 {
+#if MUTEX_COND
+    pthread_mutex_lock(&(paint_mutex));
+    pthread_cond_signal(&(render_cond));
+    pthread_cond_wait(&(paint_cond), &(paint_mutex));
+#endif
     glutPostRedisplay();
+#if MUTEX_COND
+    pthread_mutex_unlock(&(paint_mutex));
+#endif
 }
 
 static void init_callbacks()
@@ -119,17 +150,18 @@ static void init_callbacks()
 
 static void keyboard(unsigned char key, int x, int y)
 {
-    switch(key)
+    switch (key)
     {
         case '\e': /* ESC */
         {
             state = STOPPED;
-            glutIdleFunc(NULL);
+            glutIdleFunc(NULL );
             glutDestroyWindow(win_num);
-        }break;
+        }
+            break;
         case ' ':
         {
-            if(state == RUNNING)
+            if (state == RUNNING)
             {
                 state = PAUSED;
             }
@@ -137,22 +169,40 @@ static void keyboard(unsigned char key, int x, int y)
             {
                 state = RUNNING;
             }
-        }break;
+        }
+            break;
+        case 't':
+        {
+            if (traces == OFF)
+            {
+                traces = ON;
+            }
+            else
+            {
+                traces = OFF;
+            }
+        }
+            break;
         default:
         {
 
-        }break;
+        }
+            break;
     }
 }
 
 static void render_scene_cb()
 {
+    printf("render_scene_cb \n");
     glClear(GL_COLOR_BUFFER_BIT);
     for (int i = 0; i < NUM_PARTICLES; i++)
     {
         particle_draw(&(particles[i]));
 #if TRACE
-        particle_draw_trace(&(particles[i]));
+        if(traces == ON)
+        {
+            particle_draw_trace(&(particles[i]));
+        }
 #endif
     }
     glutSwapBuffers();
