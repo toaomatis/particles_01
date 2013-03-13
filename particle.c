@@ -25,7 +25,7 @@ const float CONST_SPEED = 0.0f;
 const double CONST_RESTITUTION = 0.85f;
 const double CONST_VMIN = 1E-20;
 const int CONST_COLLISION = 1;
-const int NUM_PARTICLES = 10;
+const int NUM_PARTICLES = 2500;
 const int TRACE_LENGTH = 10;
 
 static void init(void);
@@ -347,6 +347,7 @@ static void init(void)
     for (idx = 0; idx < NUM_PARTICLES; idx++)
     {
         const float r = get_random_float(2.0f, 5.0f);
+        particles[idx].pid = idx;
         particles[idx].x = get_random_float(0.0f + r, WIN_WIDTH_F - r);
         particles[idx].y = get_random_float(0.0f + r, WIN_HEIGHT_F - r);
         particles[idx].r = r;

@@ -10,7 +10,7 @@
 
 #define MUTEX_COND (0)
 #define DEBUG_TIMING (1)
-#define THREAD_POOL_SIZE (4)
+#define THREAD_POOL_SIZE (8)
 
 extern const int WIN_WIDTH_I;
 extern const int WIN_HEIGHT_I;

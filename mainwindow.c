@@ -73,7 +73,7 @@ enum DEBUG
 enum STATES state = PAUSED;
 enum TRACES traces = TRACES_ON;
 enum INFO info = INFO_ON;
-enum DEBUG debug = DEBUG_OFF;
+enum DEBUG debug = DEBUG_ON;
 
 void mainwindow(int argc, char **argv)
 {
@@ -175,11 +175,13 @@ static void *worker(void *ptr)
             int64_t duration = 0;
             clock_gettime(CLOCK_MONOTONIC, &in);
 #endif
+            int test = 0;
             for (int idx = args->base_start; idx < args->base_stop; idx++)
             {
                 for (int ndx = idx + 1; ndx < NUM_PARTICLES; ndx++)
                 {
                     particle_interact(&(particles[idx]), &(particles[ndx]));
+                    test++;
                 }
             }
             for (int idx = args->base_start; idx < args->base_stop; idx++)
@@ -192,9 +194,13 @@ static void *worker(void *ptr)
             secs_set = (double) duration / 1000.0f / 1000.0f / 1000.0f;
             if (debug == DEBUG_ON)
             {
-                printf("worker in %f secs (%f Hz) \n", secs_set, 1.0f / secs_set);
+                printf("[%d]worker in %f secs (%f Hz) iters %d \n", args->tid, secs_set, 1.0f / secs_set, test);
             }
 #endif
+        }
+        else
+        {
+            usleep(1000);
         }
 #if MUTEX_COND
         pthread_cond_signal(&(paint_cond));
@@ -300,7 +306,7 @@ static void render_scene_cb()
     secs_set = (double) duration / 1000.0f / 1000.0f / 1000.0f;
     if (debug == DEBUG_ON)
     {
-        printf("render_scene_cb in %f secs (%f Hz) \n", secs_set, 1.0f / secs_set);
+        //printf("render_scene_cb in %f secs (%f Hz) \n", secs_set, 1.0f / secs_set);
     }
 #endif
 }

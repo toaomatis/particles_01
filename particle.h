@@ -33,6 +33,7 @@ struct Particle_Trace
 
 struct Particle
 {
+    int pid;
     int alive;
     int hit;
     float x;
