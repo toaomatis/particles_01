@@ -9,6 +9,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <unistd.h>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -44,11 +45,23 @@ enum STATES
 
 enum TRACES
 {
-    ON, OFF
+    TRACES_ON, TRACES_OFF
+};
+
+enum INFO
+{
+    INFO_ON, INFO_OFF
+};
+
+enum DEBUG
+{
+    DEBUG_ON, DEBUG_OFF
 };
 
 enum STATES state = PAUSED;
-enum TRACES traces = ON;
+enum TRACES traces = TRACES_ON;
+enum INFO info = INFO_ON;
+enum DEBUG debug = DEBUG_OFF;
 
 void mainwindow(int argc, char **argv)
 {
@@ -106,6 +119,12 @@ static void worker(void *ptr)
 #endif
         if (state == RUNNING)
         {
+#if DEBUG_TIMING
+            double secs_set = 0.0f;
+            struct timespec in, out;
+            int64_t duration = 0;
+            clock_gettime(CLOCK_MONOTONIC, &in);
+#endif
             for (int idx = 0; idx < NUM_PARTICLES; idx++)
             {
                 for (int ndx = idx + 1; ndx < NUM_PARTICLES; ndx++)
@@ -117,6 +136,15 @@ static void worker(void *ptr)
             {
                 particle_move(&(particles[idx]));
             }
+#if DEBUG_TIMING
+            clock_gettime(CLOCK_MONOTONIC, &out);
+            duration = timespec_diff_ns(&in, &out);
+            secs_set = (double) duration / 1000.0f / 1000.0f / 1000.0f;
+            if(debug == DEBUG_ON)
+            {
+                printf("worker in %f secs (%f Hz) \n", secs_set, 1.0f / secs_set);
+            }
+#endif
         }
 #if MUTEX_COND
         pthread_cond_signal(&(paint_cond));
@@ -173,16 +201,20 @@ static void keyboard(unsigned char key, int x, int y)
             break;
         case 't':
         {
-            if (traces == OFF)
-            {
-                traces = ON;
-            }
-            else
-            {
-                traces = OFF;
-            }
+            traces = (traces == TRACES_OFF ? TRACES_ON : TRACES_OFF);
         }
             break;
+        case 'i':
+        {
+            info = (info == INFO_OFF ? INFO_ON : INFO_OFF);
+        }
+            break;
+        case 'd':
+        {
+            debug = (debug == DEBUG_OFF ? DEBUG_ON : DEBUG_OFF);
+        }
+            break;
+
         default:
         {
 
@@ -193,17 +225,31 @@ static void keyboard(unsigned char key, int x, int y)
 
 static void render_scene_cb()
 {
-    printf("render_scene_cb \n");
+#if DEBUG_TIMING
+    double secs_set = 0.0f;
+    struct timespec in, out;
+    int64_t duration = 0;
+    clock_gettime(CLOCK_MONOTONIC, &in);
+#endif
     glClear(GL_COLOR_BUFFER_BIT);
     for (int i = 0; i < NUM_PARTICLES; i++)
     {
         particle_draw(&(particles[i]));
 #if TRACE
-        if(traces == ON)
+        if (traces == TRACES_ON)
         {
             particle_draw_trace(&(particles[i]));
         }
 #endif
     }
     glutSwapBuffers();
+#if DEBUG_TIMING
+    clock_gettime(CLOCK_MONOTONIC, &out);
+    duration = timespec_diff_ns(&in, &out);
+    secs_set = (double) duration / 1000.0f / 1000.0f / 1000.0f;
+    if(debug == DEBUG_ON)
+    {
+        printf("render_scene_cb in %f secs (%f Hz) \n", secs_set, 1.0f / secs_set);
+    }
+#endif
 }

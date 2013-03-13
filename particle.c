@@ -26,15 +26,18 @@ const double CONST_RESTITUTION = 0.85f;
 const double CONST_VMIN = 1E-20;
 const int CONST_COLLISION = 1;
 const int NUM_PARTICLES = 2500;
-const int TRACE_LENGTH = 100;
+const int TRACE_LENGTH = 10;
 
 static void init(void);
 
-static struct Particle *particles;
+static struct Particle *particles = NULL;
 
 struct Particle* particle()
 {
-    init();
+    if (particles == NULL )
+    {
+        init();
+    }
     return particles;
 }
 
@@ -207,7 +210,7 @@ int particle_move(struct Particle *a)
     if (CONST_BOUND != NONE)
     {
         /* The particles should react to the screen boundary */
-        if (a->x + a->r > WIN_WIDTH_F )
+        if (a->x + a->r > WIN_WIDTH_F)
         {
             if (CONST_BOUND == WRAP)
             {
@@ -222,7 +225,7 @@ int particle_move(struct Particle *a)
                 a->vx = -fabs(a->vx) - CONST_VMIN; /* reverse velocity */
                 a->hit = 1;
                 /* Check if location is completely off screen */
-                if (a->x - a->r > WIN_WIDTH_F )
+                if (a->x - a->r > WIN_WIDTH_F)
                 {
                     a->x = WIN_WIDTH_F + a->r;
                 }
@@ -250,7 +253,7 @@ int particle_move(struct Particle *a)
             }
         }
 
-        if (a->y + a->r > WIN_HEIGHT_F )
+        if (a->y + a->r > WIN_HEIGHT_F)
         {
             if (CONST_BOUND == WRAP)
             {
@@ -264,7 +267,7 @@ int particle_move(struct Particle *a)
                 }
                 a->vy = -fabs(a->vy) - CONST_VMIN;
                 a->hit = 1;
-                if (a->y - a->r > WIN_HEIGHT_F )
+                if (a->y - a->r > WIN_HEIGHT_F)
                 {
                     a->y = WIN_HEIGHT_F + a->r;
                 }

@@ -5,7 +5,7 @@ DEBUG_CFLAGS = -O0 -g
 BASE_CFLAGS += -I. -D_GNU_SOURCE
 BASE_CFLAGS += $(DEBUG_CFLAGS)
 CFLAGS +=  -Wall -std=c99 ${BASE_CFLAGS}
-LIBS =  -lglut -lGLEW -lpthread
+LIBS =  -lglut -lGLEW -lpthread -lrt 
 
 EXE_NAME = particles_01
 
