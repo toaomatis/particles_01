@@ -6,6 +6,7 @@
  */
 
 #include <curses.h>
+#include <math.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,6 +19,15 @@
 #include "mainwindow.h"
 #include "particle.h"
 
+struct worker_args
+{
+    int tid;
+    uint64_t base_start;
+    uint64_t base_stop;
+    int base_size;
+};
+struct worker_args *wrkr_args ;
+
 const int WIN_WIDTH_I = 1024;
 const int WIN_HEIGHT_I = 768;
 const float WIN_WIDTH_F = 1024.0f;
@@ -26,8 +36,10 @@ const float WIN_HEIGHT_F = 768.0f;
 static int init(int argc, char **argv);
 static void init_callbacks(void);
 static void render_scene_cb(void);
-static void worker(void *ptr);
+static void *worker(void *ptr);
 static void keyboard(unsigned char key, int x, int y);
+static void start_thread_pool(void);
+static void stop_thread_pool(void);
 
 #if MUTEX_COND
 static pthread_cond_t paint_cond = PTHREAD_COND_INITIALIZER;
@@ -35,8 +47,8 @@ static pthread_cond_t render_cond = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t paint_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 static struct Particle *particles;
-static pthread_t worker_thread;
 static int win_num = -1;
+pthread_t tids[THREAD_POOL_SIZE];
 
 enum STATES
 {
@@ -71,7 +83,7 @@ void mainwindow(int argc, char **argv)
         fprintf(stderr, "Init was unsuccessful. Quitting '\n");
     }
     glutMainLoop();
-    pthread_join(worker_thread, NULL );
+    stop_thread_pool();
 }
 
 static int init(int argc, char **argv)
@@ -102,13 +114,51 @@ static int init(int argc, char **argv)
 
     particles = particle();
 
-    pthread_create(&worker_thread, NULL, (void *) &worker, (void *) NULL );
+    start_thread_pool();
 
     return 0;
 }
 
-static void worker(void *ptr)
+static void start_thread_pool()
 {
+    int idx;
+    /* NUM_PARTICLES is zero indexed */
+    wrkr_args = malloc(THREAD_POOL_SIZE * sizeof(struct worker_args));
+    /* NUM_PARTICLES / sqrt(THREAD_POOL_SIZE / idx) */
+    for (idx = 0; idx < THREAD_POOL_SIZE; idx++)
+    {
+        wrkr_args[idx].tid = idx;
+        wrkr_args[idx].base_start = NUM_PARTICLES - MIN(ceil((double)NUM_PARTICLES * sqrt((double)(THREAD_POOL_SIZE - idx) / (double)THREAD_POOL_SIZE)), NUM_PARTICLES);
+        wrkr_args[idx].base_stop = NUM_PARTICLES - MIN(ceil((double)NUM_PARTICLES * sqrt((double)(THREAD_POOL_SIZE - idx - 1) / (double)THREAD_POOL_SIZE)), NUM_PARTICLES);
+        wrkr_args[idx].base_size = NUM_PARTICLES;
+        if (wrkr_args[idx].base_start < wrkr_args[idx].base_stop)
+        {
+            pthread_create(&(tids[idx]), NULL, &worker, (void *) &(wrkr_args[idx]));
+            //sleep(5);
+        }
+        else
+        {
+            wrkr_args[idx].tid = -1;
+        }
+    }
+}
+
+static void stop_thread_pool()
+{
+    int idx;
+    for (idx = 0; idx < THREAD_POOL_SIZE; idx++)
+    {
+        if (wrkr_args[idx].tid != -1)
+        {
+            pthread_join(tids[idx], NULL ); /* Wait until thread is finished */
+        }
+    }
+    free(wrkr_args);
+}
+
+static void *worker(void *ptr)
+{
+    struct worker_args *args = (struct worker_args *) ptr;
 #if MUTEX_COND
     pthread_mutex_lock(&(paint_mutex));
 #endif
@@ -125,14 +175,14 @@ static void worker(void *ptr)
             int64_t duration = 0;
             clock_gettime(CLOCK_MONOTONIC, &in);
 #endif
-            for (int idx = 0; idx < NUM_PARTICLES; idx++)
+            for (int idx = args->base_start; idx < args->base_stop; idx++)
             {
                 for (int ndx = idx + 1; ndx < NUM_PARTICLES; ndx++)
                 {
                     particle_interact(&(particles[idx]), &(particles[ndx]));
                 }
             }
-            for (int idx = 0; idx < NUM_PARTICLES; idx++)
+            for (int idx = args->base_start; idx < args->base_stop; idx++)
             {
                 particle_move(&(particles[idx]));
             }
@@ -140,7 +190,7 @@ static void worker(void *ptr)
             clock_gettime(CLOCK_MONOTONIC, &out);
             duration = timespec_diff_ns(&in, &out);
             secs_set = (double) duration / 1000.0f / 1000.0f / 1000.0f;
-            if(debug == DEBUG_ON)
+            if (debug == DEBUG_ON)
             {
                 printf("worker in %f secs (%f Hz) \n", secs_set, 1.0f / secs_set);
             }
@@ -154,6 +204,7 @@ static void worker(void *ptr)
     pthread_mutex_unlock(&(paint_mutex));
 #endif
     pthread_exit(0); /* exit */
+    return NULL;
 } /* print_message_function ( void *ptr ) */
 
 static void animate()
@@ -247,7 +298,7 @@ static void render_scene_cb()
     clock_gettime(CLOCK_MONOTONIC, &out);
     duration = timespec_diff_ns(&in, &out);
     secs_set = (double) duration / 1000.0f / 1000.0f / 1000.0f;
-    if(debug == DEBUG_ON)
+    if (debug == DEBUG_ON)
     {
         printf("render_scene_cb in %f secs (%f Hz) \n", secs_set, 1.0f / secs_set);
     }

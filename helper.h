@@ -12,6 +12,7 @@
 #include <time.h>
 
 #define NSEC_PER_SEC 1000000000
+#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 
 void timespec_add(struct timespec *t1, const struct timespec *t2);
 void timespec_add_ns(struct timespec *t1, const long nsec);
