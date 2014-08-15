@@ -15,8 +15,6 @@
 #include "helper.h"
 #include "mainwindow.h"
 
-static const float STEP_SIZE = (0.01f);
-
 const enum BOUNDS CONST_BOUND = NONE;
 const float CONST_MASS_GRAVITY = 0.05f;
 const float CONST_GRAVITY = 0.00f;
@@ -49,9 +47,9 @@ void particle_draw(struct Particle *a)
     glBegin(GL_QUADS);
     glColor4f(a->color.r, a->color.g, a->color.b, a->color.a);
     glVertex2f(a->x - a->r, a->y - a->r);
-    glVertex2f(a->x+a->r, a->y - a->r);
-    glVertex2f(a->x+a->r, a->y+a->r);
-    glVertex2f(a->x - a->r, a->y+a->r);
+    glVertex2f(a->x + a->r, a->y - a->r);
+    glVertex2f(a->x + a->r, a->y + a->r);
+    glVertex2f(a->x - a->r, a->y + a->r);
     glEnd();
 #if MUTEX
     pthread_mutex_unlock(&(a->mutex));

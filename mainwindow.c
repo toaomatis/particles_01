@@ -28,6 +28,9 @@ const float WIN_HEIGHT_F = 768.0f;
 static int init(int argc, char **argv);
 static void init_callbacks(void);
 static void render_scene_cb(void);
+static float scale = 1.0f;
+static float dest_w = 1024.0f;
+static float dest_h = 768.0f;
 
 static void keyboard(unsigned char key, int x, int y);
 
@@ -83,10 +86,6 @@ static int init(int argc, char **argv)
     return 0;
 }
 
-
-
-
-
 static void animate()
 {
 #if MUTEX_COND
@@ -114,7 +113,7 @@ static void keyboard(unsigned char key, int x, int y)
         case '\e': /* ESC */
         {
             state = STOPPED;
-            glutIdleFunc(NULL );
+            glutIdleFunc(NULL);
             glutDestroyWindow(win_num);
         }
             break;
@@ -145,12 +144,28 @@ static void keyboard(unsigned char key, int x, int y)
             debug = (debug == DEBUG_OFF ? DEBUG_ON : DEBUG_OFF);
         }
             break;
+        case '+':
+        {
+            scale += 0.1;
+        }
+            break;
+        case '-':
+        {
+            scale -= 0.1f;
+            if (scale < 0.1f)
+            {
+                scale = 0.1f;
+            }
+        }
+            break;
         default:
         {
 
         }
             break;
     }
+    dest_w = WIN_WIDTH_F * scale;
+    dest_h = WIN_HEIGHT_F * scale;
 }
 
 static void render_scene_cb()
@@ -162,6 +177,9 @@ static void render_scene_cb()
     clock_gettime(CLOCK_MONOTONIC, &in);
 #endif
     glClear(GL_COLOR_BUFFER_BIT);
+    glPushMatrix();
+    glTranslatef((WIN_WIDTH_F - dest_w) / 2.0f, (WIN_HEIGHT_F - dest_h) / 2.0f, 0.0f);
+    glScalef(scale, scale, 1.0f);
     for (int i = 0; i < NUM_PARTICLES; i++)
     {
         particle_draw(&(particles[i]));
@@ -172,6 +190,7 @@ static void render_scene_cb()
         }
 #endif
     }
+    glPopMatrix();
     glutSwapBuffers();
 #if DEBUG_TIMING
     clock_gettime(CLOCK_MONOTONIC, &out);
