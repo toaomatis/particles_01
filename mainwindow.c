@@ -145,7 +145,6 @@ static void keyboard(unsigned char key, int x, int y)
             debug = (debug == DEBUG_OFF ? DEBUG_ON : DEBUG_OFF);
         }
             break;
-
         default:
         {
 

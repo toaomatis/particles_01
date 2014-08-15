@@ -20,9 +20,9 @@
 #include "threading.h"
 
 #if MUTEX_COND
-static pthread_cond_t paint_cond = PTHREAD_COND_INITIALIZER;
-static pthread_cond_t render_cond = PTHREAD_COND_INITIALIZER;
-static pthread_mutex_t paint_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t paint_cond = PTHREAD_COND_INITIALIZER;
+pthread_cond_t render_cond = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t paint_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 static struct Particle *particles;
@@ -53,8 +53,12 @@ void start_thread_pool()
         wrkr_args[idx].base_start = NUM_PARTICLES - MIN(ceil((double)NUM_PARTICLES * sqrt((double)(THREAD_POOL_SIZE - idx) / (double)THREAD_POOL_SIZE)), NUM_PARTICLES);
         wrkr_args[idx].base_stop = NUM_PARTICLES - MIN(ceil((double)NUM_PARTICLES * sqrt((double)(THREAD_POOL_SIZE - idx - 1) / (double)THREAD_POOL_SIZE)), NUM_PARTICLES);
         wrkr_args[idx].base_size = NUM_PARTICLES;
+
         if (wrkr_args[idx].base_start < wrkr_args[idx].base_stop)
         {
+#if DEBUG_LOG
+        fprintf(stdout, "Starting thread %d out of %d from %lu to %lu (%d) \n", idx, THREAD_POOL_SIZE, wrkr_args[idx].base_start, wrkr_args[idx].base_stop, wrkr_args[idx].base_size);
+#endif
             pthread_create(&(tids[idx]), NULL, &worker, (void *) &(wrkr_args[idx]));
             //sleep(5);
         }
@@ -80,6 +84,9 @@ void stop_thread_pool()
 
 static void *worker(void *ptr)
 {
+#if DEBUG_LOG
+    fprintf(stdout, "Worker thread starting...");
+#endif
     struct worker_args *args = (struct worker_args *) ptr;
 #if MUTEX_COND
     pthread_mutex_lock(&(paint_mutex));
@@ -87,7 +94,10 @@ static void *worker(void *ptr)
     while (state != STOPPED)
     {
 #if MUTEX_COND
-        pthread_cond_wait(&(render_cond), &(paint_mutex));
+        struct timespec ts;
+        clock_gettime(CLOCK_REALTIME, &ts);
+        timespec_add_ns(&ts, 1000*1000);
+        pthread_cond_timedwait(&(render_cond), &(paint_mutex), &ts);
 #endif
         if (state == RUNNING)
         {

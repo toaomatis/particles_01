@@ -8,7 +8,7 @@
 #ifndef MAINWINDOW_H_
 #define MAINWINDOW_H_
 
-#define DEBUG_TIMING (1)
+#define DEBUG_TIMING (0)
 
 extern const int WIN_WIDTH_I;
 extern const int WIN_HEIGHT_I;

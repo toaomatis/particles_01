@@ -34,9 +34,9 @@ void timespec_add(struct timespec *t1, const struct timespec *t2)
 }
 void timespec_add_ns(struct timespec *t, const long nsec)
 {
-    t->tv_sec += nsec/NSEC_PER_SEC;
-    t->tv_nsec += nsec%NSEC_PER_SEC;
-    while(t->tv_nsec>NSEC_PER_SEC)
+    t->tv_sec += nsec / NSEC_PER_SEC;
+    t->tv_nsec += nsec % NSEC_PER_SEC;
+    while (t->tv_nsec > NSEC_PER_SEC)
     {
         t->tv_sec++;
         t->tv_nsec -= NSEC_PER_SEC;
