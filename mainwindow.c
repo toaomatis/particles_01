@@ -25,8 +25,7 @@ const int WIN_HEIGHT_I = 768;
 const float WIN_WIDTH_F = 1024.0f;
 const float WIN_HEIGHT_F = 768.0f;
 
-static int init(int argc, char **argv);
-static void init_callbacks(void);
+static void animate(void);
 static void render_scene_cb(void);
 static float scale = 1.0f;
 static float dest_w = 1024.0f;
@@ -42,50 +41,6 @@ enum TRACES traces = TRACES_ON;
 enum INFO info = INFO_ON;
 enum DEBUG debug = DEBUG_ON;
 
-void mainwindow(int argc, char **argv)
-{
-    int init_result = init(argc, argv);
-    if (init_result != 0)
-    {
-        fprintf(stderr, "Init was unsuccessful. Quitting '\n");
-    }
-    glutMainLoop();
-    stop_thread_pool();
-}
-
-static int init(int argc, char **argv)
-{
-    GLenum res;
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-    glutInitWindowSize(WIN_WIDTH_I, WIN_HEIGHT_I);
-    glutInitWindowPosition(100, 100);
-    win_num = glutCreateWindow("Tutorial 01");
-
-    init_callbacks();
-
-    // Must be done after glut is initialized!
-    res = glewInit();
-    if (res != GLEW_OK)
-    {
-        fprintf(stderr, "Error: '%s'\n", glewGetErrorString(res));
-        return -1;
-    }
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0.0f, WIN_WIDTH_F, WIN_HEIGHT_F, 0.0f, 0.0f, 1.0f);
-    glMatrixMode(GL_MODELVIEW);
-    glDisable(GL_DEPTH_TEST);
-
-    particles = particle();
-
-    start_thread_pool();
-
-    return 0;
-}
-
 static void animate()
 {
 #if MUTEX_COND
@@ -97,13 +52,6 @@ static void animate()
 #if MUTEX_COND
     pthread_mutex_unlock(&(paint_mutex));
 #endif
-}
-
-static void init_callbacks()
-{
-    glutDisplayFunc(render_scene_cb);
-    glutKeyboardFunc(keyboard);
-    glutIdleFunc(animate);
 }
 
 static void keyboard(unsigned char key, int x, int y)
@@ -146,16 +94,12 @@ static void keyboard(unsigned char key, int x, int y)
             break;
         case '+':
         {
-            scale += 0.1;
+            scale *= 1.1;
         }
             break;
         case '-':
         {
-            scale -= 0.1f;
-            if (scale < 0.1f)
-            {
-                scale = 0.1f;
-            }
+            scale /= 1.1f;
         }
             break;
         default:
@@ -176,7 +120,7 @@ static void render_scene_cb()
     int64_t duration = 0;
     clock_gettime(CLOCK_MONOTONIC, &in);
 #endif
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glPushMatrix();
     glTranslatef((WIN_WIDTH_F - dest_w) / 2.0f, (WIN_HEIGHT_F - dest_h) / 2.0f, 0.0f);
     glScalef(scale, scale, 1.0f);
@@ -201,4 +145,65 @@ static void render_scene_cb()
         //printf("render_scene_cb in %f secs (%f Hz) \n", secs_set, 1.0f / secs_set);
     }
 #endif
+}
+
+
+void changeSize(int w, int h)
+{
+
+    // Prevent a divide by zero, when window is too short
+    // (you cant make a window of zero width).
+    if (h == 0)
+        h = 1;
+    float ratio = w * 1.0 / h;
+
+    // Use the Projection Matrix
+    glMatrixMode(GL_PROJECTION);
+
+    // Reset Matrix
+    glLoadIdentity();
+
+    // Set the viewport to be the entire window
+    glViewport(0, 0, w, h);
+
+    // Set the correct perspective.
+    gluPerspective(45.0f, ratio, 0.1f, 100.0f);
+
+    // Get Back to the Modelview
+    glMatrixMode(GL_MODELVIEW);
+}
+
+void mainwindow(int argc, char **argv)
+{
+    GLenum res;
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+    glutInitWindowPosition(100, 100);
+    glutInitWindowSize(WIN_WIDTH_I, WIN_HEIGHT_I);
+    win_num = glutCreateWindow("Tutorial 01");
+    // Must be done after glut is initialized!
+    res = glewInit();
+    if (res != GLEW_OK)
+    {
+        fprintf(stderr, "Error: '%s'\n", glewGetErrorString(res));
+        return;
+    }
+
+    glutDisplayFunc(render_scene_cb);
+    glutReshapeFunc(changeSize);
+    glutIdleFunc(animate);
+
+    glutKeyboardFunc(keyboard);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+    // OpenGL init
+    glEnable(GL_DEPTH_TEST);
+
+    particles = particle();
+    start_thread_pool();
+
+    glutMainLoop();
+
+    stop_thread_pool();
 }
