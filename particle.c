@@ -25,7 +25,7 @@ const float CONST_SPEED = 0.0f;
 const double CONST_RESTITUTION = 0.85f;
 const double CONST_VMIN = 1E-20;
 const int CONST_COLLISION = 1;
-const int NUM_PARTICLES = 500;
+const int NUM_PARTICLES = 2000;
 const int TRACE_LENGTH = 10;
 
 static void init(void);
@@ -46,12 +46,12 @@ void particle_draw(struct Particle *a)
 #if MUTEX
     pthread_mutex_lock(&(a->mutex));
 #endif
-    glBegin(GL_LINE_LOOP);
+    glBegin(GL_QUADS);
     glColor4f(a->color.r, a->color.g, a->color.b, a->color.a);
-    for (float i = 0; i <= (2 * M_PI) + STEP_SIZE; i += STEP_SIZE)
-    {
-        glVertex2f(a->x + (sin(i) * a->r), a->y + (cos(i) * a->r));
-    }
+    glVertex2f(a->x - a->r, a->y - a->r);
+    glVertex2f(a->x+a->r, a->y - a->r);
+    glVertex2f(a->x+a->r, a->y+a->r);
+    glVertex2f(a->x - a->r, a->y+a->r);
     glEnd();
 #if MUTEX
     pthread_mutex_unlock(&(a->mutex));
