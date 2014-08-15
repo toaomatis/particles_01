@@ -25,7 +25,7 @@ const float CONST_SPEED = 0.0f;
 const double CONST_RESTITUTION = 0.85f;
 const double CONST_VMIN = 1E-20;
 const int CONST_COLLISION = 1;
-const int NUM_PARTICLES = 2500;
+const int NUM_PARTICLES = 500;
 const int TRACE_LENGTH = 10;
 
 static void init(void);

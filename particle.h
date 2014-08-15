@@ -8,8 +8,8 @@
 #ifndef PARTICLE_H_
 #define PARTICLE_H_
 
-#define TRACE (1)
-#define MUTEX (1)
+#define TRACE (0)
+#define MUTEX (0)
 
 enum BOUNDS
 {

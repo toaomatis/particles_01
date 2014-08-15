@@ -12,7 +12,7 @@ void start_thread_pool(void);
 void stop_thread_pool(void);
 
 #define MUTEX_COND (1)
-#define THREAD_POOL_SIZE (1000)
+#define THREAD_POOL_SIZE (1)
 
 #if MUTEX_COND
 extern pthread_cond_t paint_cond;
