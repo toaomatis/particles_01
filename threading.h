@@ -12,6 +12,6 @@ void start_thread_pool(void);
 void stop_thread_pool(void);
 
 #define MUTEX_COND (0)
-#define THREAD_POOL_SIZE (8)
+#define NUM_THREAD_POOLS (1)
 
 #endif /* THREADING_H_ */
