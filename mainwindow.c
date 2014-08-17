@@ -37,7 +37,9 @@ static int win_num = -1;
 enum STATES state = PAUSED;
 enum TRACES traces = TRACES_ON;
 enum INFO info = INFO_ON;
+#if DEBUG_TIMING
 enum DEBUG debug = DEBUG_ON;
+#endif
 
 void mainwindow(int argc, char **argv)
 {
@@ -83,10 +85,6 @@ static int init(int argc, char **argv)
     return 0;
 }
 
-
-
-
-
 static void animate()
 {
 #if MUTEX_COND
@@ -114,7 +112,7 @@ static void keyboard(unsigned char key, int x, int y)
         case '\e': /* ESC */
         {
             state = STOPPED;
-            glutIdleFunc(NULL );
+            glutIdleFunc(NULL);
             glutDestroyWindow(win_num);
         }
             break;
@@ -140,12 +138,13 @@ static void keyboard(unsigned char key, int x, int y)
             info = (info == INFO_OFF ? INFO_ON : INFO_OFF);
         }
             break;
+#if DEBUG_TIMING
         case 'd':
         {
             debug = (debug == DEBUG_OFF ? DEBUG_ON : DEBUG_OFF);
         }
             break;
-
+#endif
         default:
         {
 
@@ -180,7 +179,7 @@ static void render_scene_cb()
     secs_set = (double) duration / 1000.0f / 1000.0f / 1000.0f;
     if (debug == DEBUG_ON)
     {
-        //printf("render_scene_cb in %f secs (%f Hz) \n", secs_set, 1.0f / secs_set);
+        printf("render_scene_cb in %f secs (%f Hz) \n", secs_set, 1.0f / secs_set);
     }
 #endif
 }

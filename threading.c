@@ -20,9 +20,9 @@
 #include "threading.h"
 
 #if MUTEX_COND
-static pthread_cond_t paint_cond = PTHREAD_COND_INITIALIZER;
-static pthread_cond_t render_cond = PTHREAD_COND_INITIALIZER;
-static pthread_mutex_t paint_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t paint_cond = PTHREAD_COND_INITIALIZER;
+pthread_cond_t render_cond = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t paint_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 static struct Particle *particles;
@@ -87,6 +87,7 @@ static void *worker(void *ptr)
     while (state != STOPPED)
     {
 #if MUTEX_COND
+        pthread_cond_signal(&(paint_cond));
         pthread_cond_wait(&(render_cond), &(paint_mutex));
 #endif
         if (state == RUNNING)
@@ -124,9 +125,6 @@ static void *worker(void *ptr)
         {
             usleep(1000);
         }
-#if MUTEX_COND
-        pthread_cond_signal(&(paint_cond));
-#endif
     }
 #if MUTEX_COND
     pthread_mutex_unlock(&(paint_mutex));

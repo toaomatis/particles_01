@@ -25,7 +25,7 @@ const float CONST_SPEED = 0.0f;
 const double CONST_RESTITUTION = 0.85f;
 const double CONST_VMIN = 1E-20;
 const int CONST_COLLISION = 1;
-const int NUM_PARTICLES = 2500;
+const int NUM_PARTICLES = 250;
 const int TRACE_LENGTH = 10;
 
 static void init(void);
@@ -34,7 +34,7 @@ static struct Particle *particles = NULL;
 
 struct Particle* particle()
 {
-    if (particles == NULL )
+    if (particles == NULL)
     {
         init();
     }
@@ -371,7 +371,7 @@ static void init(void)
         }
 #endif
 #if MUTEX
-        pthread_mutex_init(&(particles[idx].mutex), NULL );
+        pthread_mutex_init(&(particles[idx].mutex), NULL);
 #endif
         printf("[%d] x %4.2f y %4.2f r %4.2f Cr %4.2f Cg %4.2f Cb %4.2f Ca %4.2f \n", idx, particles[idx].x, particles[idx].y,
                 particles[idx].r, particles[idx].color.r, particles[idx].color.g, particles[idx].color.b, particles[idx].color.a);

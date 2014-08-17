@@ -10,8 +10,6 @@
 
 #define DEBUG_TIMING (1)
 
-extern const int WIN_WIDTH_I;
-extern const int WIN_HEIGHT_I;
 extern const float WIN_WIDTH_F;
 extern const float WIN_HEIGHT_F;
 
@@ -29,16 +27,17 @@ enum INFO
 {
     INFO_ON, INFO_OFF
 };
-
+#if DEBUG_TIMING
 enum DEBUG
 {
     DEBUG_ON, DEBUG_OFF
 };
+#endif
 
 extern enum STATES state;
-extern enum TRACES traces;
-extern enum INFO info;
+#if DEBUG_TIMING
 extern enum DEBUG debug;
+#endif
 
 void mainwindow(int argc, char **argv);
 
