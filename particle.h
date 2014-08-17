@@ -8,7 +8,7 @@
 #ifndef PARTICLE_H_
 #define PARTICLE_H_
 
-#define TRACE (1)
+#define TRACE (0)
 #define MUTEX (0)
 
 enum BOUNDS
@@ -23,14 +23,14 @@ struct Particle_Color
     float b;
     float a;
 };
-
+#if TRACE
 struct Particle_Trace
 {
     int init;
     float x;
     float y;
 };
-
+#endif
 struct Particle
 {
     int pid;
@@ -52,21 +52,13 @@ struct Particle
 #endif
 };
 
-extern const enum BOUNDS CONST_BOUND;
-extern const float CONST_MASS_GRAVITY;
-extern const float CONST_MASS;
-extern const float CONST_SPEED;
-extern const double CONST_RESTITUTION;
-extern const double CONST_VMIN;
-extern const int CONST_COLLISION;
-extern const float CONST_GRAVITY;
 extern const int NUM_PARTICLES;
-extern const int TRACE_LENGTH;
 
 struct Particle* particle();
 void particle_draw(struct Particle *particle);
 int particle_interact(struct Particle *a, struct Particle *b);
 int particle_move(struct Particle *a);
+#if TRACE
 void particle_draw_trace(struct Particle *a);
-
+#endif
 #endif /* PARTICLE_H_ */

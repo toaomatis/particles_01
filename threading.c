@@ -20,9 +20,9 @@
 #include "threading.h"
 
 #if MUTEX_COND
-static pthread_cond_t paint_cond = PTHREAD_COND_INITIALIZER;
-static pthread_cond_t render_cond = PTHREAD_COND_INITIALIZER;
-static pthread_mutex_t paint_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t paint_cond = PTHREAD_COND_INITIALIZER;
+pthread_cond_t render_cond = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t paint_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 static struct Particle *particles;
@@ -35,7 +35,7 @@ struct worker_args
     int base_size;
 };
 struct worker_args *wrkr_args ;
-static pthread_t tids[THREAD_POOL_SIZE];
+static pthread_t tids[NUM_THREAD_POOLS];
 
 
 static void *worker(void *ptr);
@@ -45,13 +45,13 @@ void start_thread_pool()
     int idx;
     particles = particle();
     /* NUM_PARTICLES is zero indexed */
-    wrkr_args = malloc(THREAD_POOL_SIZE * sizeof(struct worker_args));
+    wrkr_args = malloc(NUM_THREAD_POOLS * sizeof(struct worker_args));
     /* NUM_PARTICLES / sqrt(THREAD_POOL_SIZE / idx) */
-    for (idx = 0; idx < THREAD_POOL_SIZE; idx++)
+    for (idx = 0; idx < NUM_THREAD_POOLS; idx++)
     {
         wrkr_args[idx].tid = idx;
-        wrkr_args[idx].base_start = NUM_PARTICLES - MIN(ceil((double)NUM_PARTICLES * sqrt((double)(THREAD_POOL_SIZE - idx) / (double)THREAD_POOL_SIZE)), NUM_PARTICLES);
-        wrkr_args[idx].base_stop = NUM_PARTICLES - MIN(ceil((double)NUM_PARTICLES * sqrt((double)(THREAD_POOL_SIZE - idx - 1) / (double)THREAD_POOL_SIZE)), NUM_PARTICLES);
+        wrkr_args[idx].base_start = NUM_PARTICLES - MIN(ceil((double)NUM_PARTICLES * sqrt((double)(NUM_THREAD_POOLS - idx) / (double)NUM_THREAD_POOLS)), NUM_PARTICLES);
+        wrkr_args[idx].base_stop = NUM_PARTICLES - MIN(ceil((double)NUM_PARTICLES * sqrt((double)(NUM_THREAD_POOLS - idx - 1) / (double)NUM_THREAD_POOLS)), NUM_PARTICLES);
         wrkr_args[idx].base_size = NUM_PARTICLES;
         if (wrkr_args[idx].base_start < wrkr_args[idx].base_stop)
         {
@@ -68,7 +68,7 @@ void start_thread_pool()
 void stop_thread_pool()
 {
     int idx;
-    for (idx = 0; idx < THREAD_POOL_SIZE; idx++)
+    for (idx = 0; idx < NUM_THREAD_POOLS; idx++)
     {
         if (wrkr_args[idx].tid != -1)
         {
@@ -87,6 +87,7 @@ static void *worker(void *ptr)
     while (state != STOPPED)
     {
 #if MUTEX_COND
+        pthread_cond_signal(&(paint_cond));
         pthread_cond_wait(&(render_cond), &(paint_mutex));
 #endif
         if (state == RUNNING)
@@ -124,9 +125,6 @@ static void *worker(void *ptr)
         {
             usleep(1000);
         }
-#if MUTEX_COND
-        pthread_cond_signal(&(paint_cond));
-#endif
     }
 #if MUTEX_COND
     pthread_mutex_unlock(&(paint_mutex));
