@@ -31,6 +31,9 @@ static float scale = 1.0f;
 static float dest_w = 1024.0f;
 static float dest_h = 768.0f;
 
+static float eye_x = 0;
+static float eye_y = 0;
+
 static void keyboard(unsigned char key, int x, int y);
 
 static struct Particle *particles;
@@ -52,6 +55,26 @@ static void animate()
 #if MUTEX_COND
     pthread_mutex_unlock(&(paint_mutex));
 #endif
+}
+
+static void special(int key, int x, int y)
+{
+    switch (key)
+    {
+        case GLUT_KEY_LEFT:
+            eye_x -= 100;
+            break;
+        case GLUT_KEY_RIGHT:
+            eye_x += 100;
+            break;
+        case GLUT_KEY_UP:
+            eye_y += 100;
+            break;
+        case GLUT_KEY_DOWN:
+            eye_y -= 100;
+            break;
+    }
+    fprintf(stdout, "Eye %0.2f %0.2f\n", eye_x, eye_y);
 }
 
 static void keyboard(unsigned char key, int x, int y)
@@ -110,6 +133,7 @@ static void keyboard(unsigned char key, int x, int y)
     }
     dest_w = WIN_WIDTH_F * scale;
     dest_h = WIN_HEIGHT_F * scale;
+    fprintf(stdout, "Scale %0.2f Width %0.2f Height %0.2f\n", scale, dest_w, dest_h);
 }
 
 static void render_scene_cb()
@@ -120,21 +144,37 @@ static void render_scene_cb()
     int64_t duration = 0;
     clock_gettime(CLOCK_MONOTONIC, &in);
 #endif
+    // Clear Color and Depth Buffers
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glPushMatrix();
-    glTranslatef((WIN_WIDTH_F - dest_w) / 2.0f, (WIN_HEIGHT_F - dest_h) / 2.0f, 0.0f);
-    glScalef(scale, scale, 1.0f);
+
+    // Reset transformations
+    glLoadIdentity();
+    // Set the camera
+    //gluLookAt(WIN_WIDTH_F / 2.0f, WIN_HEIGHT_F / 2.0f, -1.0f, WIN_WIDTH_F / 2.0f, WIN_HEIGHT_F / 2.0f, 1.0f, 0.0f, 1.0f, 0.0f);
+    //gluLookAt(dest_w / 2.0f, dest_h / 2.0f, -1.0f, dest_w / 2.0f, dest_h / 2.0f, 1.0f, 0.0f, 1.0f, 0.0f);
+    //gluLookAt(WIN_WIDTH_F , 1.0f, -1.0f, 0, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f);
+    //gluLookAt(WIN_WIDTH_F , 0.0, -1.0f, WIN_WIDTH_F * scale, 0.0, 1.0f, 0.0f, 1.0f, 0.0f);
+    glColor3f(0.9f, 0.9f, 0.9f);
+    glBegin(GL_QUADS);
+    glVertex3f(-100.0f, 0.0f, -100.0f);
+    glVertex3f(-100.0f, 0.0f, 100.0f);
+    glVertex3f(100.0f, 0.0f, 100.0f);
+    glVertex3f(100.0f, 0.0f, -100.0f);
+    glEnd();
     for (int i = 0; i < NUM_PARTICLES; i++)
     {
-        particle_draw(&(particles[i]));
+        struct Particle *p = &(particles[i]);
+        glPushMatrix();
+        glTranslatef(p->x, p->y, 0.1f);
+        particle_draw(p);
+        glPopMatrix();
 #if TRACE
         if (traces == TRACES_ON)
         {
-            particle_draw_trace(&(particles[i]));
+            particle_draw_trace();
         }
 #endif
     }
-    glPopMatrix();
     glutSwapBuffers();
 #if DEBUG_TIMING
     clock_gettime(CLOCK_MONOTONIC, &out);
@@ -142,11 +182,10 @@ static void render_scene_cb()
     secs_set = (double) duration / 1000.0f / 1000.0f / 1000.0f;
     if (debug == DEBUG_ON)
     {
-        //printf("render_scene_cb in %f secs (%f Hz) \n", secs_set, 1.0f / secs_set);
+        printf("render_scene_cb in %f secs (%f Hz) \n", secs_set, 1.0f / secs_set);
     }
 #endif
 }
-
 
 void changeSize(int w, int h)
 {
@@ -155,7 +194,10 @@ void changeSize(int w, int h)
     // (you cant make a window of zero width).
     if (h == 0)
         h = 1;
-    float ratio = w * 1.0 / h;
+    float ratio = ((float) w / (float) h);
+
+    // Set the viewport to be the entire window
+    glViewport(0, 0, w, h);
 
     // Use the Projection Matrix
     glMatrixMode(GL_PROJECTION);
@@ -163,14 +205,12 @@ void changeSize(int w, int h)
     // Reset Matrix
     glLoadIdentity();
 
-    // Set the viewport to be the entire window
-    glViewport(0, 0, w, h);
-
-    // Set the correct perspective.
-    gluPerspective(45.0f, ratio, 0.1f, 100.0f);
+    glFrustum(0.0f, WIN_WIDTH_F, 0.0f, WIN_HEIGHT_F, -1.0f, 10.0f);
 
     // Get Back to the Modelview
     glMatrixMode(GL_MODELVIEW);
+    // Reset Matrix
+    glLoadIdentity();
 }
 
 void mainwindow(int argc, char **argv)
@@ -194,6 +234,7 @@ void mainwindow(int argc, char **argv)
     glutIdleFunc(animate);
 
     glutKeyboardFunc(keyboard);
+    glutSpecialFunc(special);
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 

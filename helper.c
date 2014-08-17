@@ -76,7 +76,7 @@ struct timespec timespec_diff(struct timespec *start, struct timespec *end)
   return ret;
 }
 
-float get_random_float(const float min, const float max)
+float get_random_float_ranged(const float min, const float max)
 {
     const float delta = max - min;
     float value = min + (((float) rand() / RAND_MAX) * delta);

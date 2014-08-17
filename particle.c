@@ -44,13 +44,8 @@ void particle_draw(struct Particle *a)
 #if MUTEX
     pthread_mutex_lock(&(a->mutex));
 #endif
-    glBegin(GL_QUADS);
     glColor4f(a->color.r, a->color.g, a->color.b, a->color.a);
-    glVertex2f(a->x - a->r, a->y - a->r);
-    glVertex2f(a->x + a->r, a->y - a->r);
-    glVertex2f(a->x + a->r, a->y + a->r);
-    glVertex2f(a->x - a->r, a->y + a->r);
-    glEnd();
+    glutSolidCube(a->r);
 #if MUTEX
     pthread_mutex_unlock(&(a->mutex));
 #endif
@@ -344,17 +339,17 @@ static void init(void)
     particles = malloc(NUM_PARTICLES * size_of);
     for (idx = 0; idx < NUM_PARTICLES; idx++)
     {
-        const float r = get_random_float(2.0f, 5.0f);
+        const float r = get_random_float_ranged(2.0f, 5.0f);
         particles[idx].pid = idx;
-        particles[idx].x = get_random_float(0.0f + r, WIN_WIDTH_F - r);
-        particles[idx].y = get_random_float(0.0f + r, WIN_HEIGHT_F - r);
+        particles[idx].x = get_random_float_ranged(0.0f + r, WIN_WIDTH_F - r);
+        particles[idx].y = get_random_float_ranged(0.0f + r, WIN_HEIGHT_F - r);
         particles[idx].r = r;
         particles[idx].m = CONST_MASS;
-        particles[idx].vx = get_random_float(0.0f, CONST_SPEED);
-        particles[idx].vy = get_random_float(0.0f, CONST_SPEED);
-        particles[idx].color.r = get_random_float(0.5f, 1.0f);
-        particles[idx].color.g = get_random_float(0.5f, 1.0f);
-        particles[idx].color.b = get_random_float(0.5f, 1.0f);
+        particles[idx].vx = get_random_float_ranged(0.0f, CONST_SPEED);
+        particles[idx].vy = get_random_float_ranged(0.0f, CONST_SPEED);
+        particles[idx].color.r = get_random_float_ranged(0.5f, 1.0f);
+        particles[idx].color.g = get_random_float_ranged(0.5f, 1.0f);
+        particles[idx].color.b = get_random_float_ranged(0.5f, 1.0f);
         particles[idx].color.a = 1.0f;
         particles[idx].alive = 1;
         particles[idx].hit = 0;
