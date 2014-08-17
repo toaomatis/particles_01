@@ -5,7 +5,7 @@ Gravity Simulator based on C POSIX library and visualized by OpenGL
 
 ## History
 I'm an adjective fan of planets, stars, galaxies and the cosmos in total. So I try to watch as much as science documentary serie there are.
-During one of the episodes of *Through the Wormhole* a computer program was shown which simulated the agglomeration of (dark))matter. At that point I dicided I had to create such a program myself. 
+During one of the episodes of *Through the Wormhole* a computer program was shown which simulated the agglomeration of (dark)matter. At that point I dicided I had to write such a program myself. 
 After a couple of hours of coding, my Java application was done, but the performance was terrible. I dicided to ditch the high-level programming language and rewrote the application in C.
 While the calculations require lots of CPU power, I added thread pools to spread and balance the calcuations over more cores and added mutexes and conditionals to synchronize the simulation and signal the window when a redraw was required.
 ```
@@ -19,7 +19,7 @@ Recently I watched the *Cosmos: A Spacetime Odyssey* and exactly the same simula
 * Zoom, pan, pitch and rotate the simulation, this requires a 3D scene. 
 * Saving and loading of the current state
 * On the fly parameter adjustmens
-* Scale window
+* Resize window
 * Port to OpenCL
 * Whatever you come up with :-)
 
@@ -37,20 +37,20 @@ Everything should go fine and after the make command completes, an executable na
 Simply type 
 > ./particles_01
 
-in your shell and some logging should appear followd by the main screen with lots of particles in it. 
+in your shell and some logging should appear followed by the main screen with lots of particles in it. 
 
 ## Running, pausing and terminating the simulator
 The following keyboard keys are implemented:
 * Esc - Terminates the simulation and exits the application
 * Space - Starts or pauses the simulation
-* d - Enables or disables debug logging to the console
-* t - Shows or hides trace paths from the particles
+* d - Enables or disables debug logging to the console (Beware of the macro DEBUG_TIMING)
+* t - Shows or hides trace paths from the particles (Beware of the macro TRACE)
 
 ## Changing the simulator parameters
-There are a lot of parameters that can be changed to alter the simulation, e.g.:
+There are lots of parameters that can be changed to alter the simulation, e.g.:
 * The bounds of the screen: 
   * Wrap - When a particle leaves one edge of the screen, it wraps arround the shortest distance
-  * Bounce - When a particle hits an edghe of the screen, it bounces back in the opposite direction
+  * Bounce - When a particle hits an edge of the screen, it bounces back in the opposite direction
   * None - The screen is only the viewport of the simulation
 * The action between particles on collission:
   * None - Particles won't collide 
@@ -60,6 +60,7 @@ There are a lot of parameters that can be changed to alter the simulation, e.g.:
 * World Gravity (how strong the ground will attract each particle)
 * Mutual gravity between particles 
 * The mass of the particles 
-* The length of the trace of a particle 
+* The length of the trace of a particle (Beware of the macro TRACE)
 * The restitution (friction) when a particle interact with another particle or the bounds of the screen
+
 Unfortunalty, these parameters are all hardcoded in particle.c, so after you alter them, you need to recompile the source(s) and restart the application to take effect. 
