@@ -49,13 +49,13 @@ The following keyboard keys are implemented:
 ## Changing the simulator parameters
 There are a lot of parameters that can be changed to alter the simulation, e.g.:
 * The bounds of the screen: 
-** Wrap - When a particle leaves one edge of the screen, it wraps arround the shortest distance
-** Bounce - When a particle hits an edghe of the screen, it bounces back in the opposite direction
-** None - The screen is only the viewport of the simulation
+  * Wrap - When a particle leaves one edge of the screen, it wraps arround the shortest distance
+  * Bounce - When a particle hits an edghe of the screen, it bounces back in the opposite direction
+  * None - The screen is only the viewport of the simulation
 * The action between particles on collission:
-** None - Particles won't collide 
-** Collide - Both particles will change course based on their momentum
-** Mush - The paricles will be combined and the new particle will change course based on the combined momentum
+  * None - Particles won't collide 
+  * Collide - Both particles will change course based on their momentum
+  * Mush - The paricles will be combined and the new particle will change course based on the combined momentum
 * The number of particles 
 * World Gravity (how strong the ground will attract each particle)
 * Mutual gravity between particles 
