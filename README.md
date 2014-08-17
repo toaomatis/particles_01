@@ -37,7 +37,7 @@ Everything should go fine and after the make command completes, an executable na
 Simply type 
 > ./particles_01
 
-in your shell and some logging should appear followd by the main screen with lots of particles in in. 
+in your shell and some logging should appear followd by the main screen with lots of particles in it. 
 
 ## Running, pausing and terminating the simulator
 The following keyboard keys are implemented:
@@ -50,7 +50,7 @@ The following keyboard keys are implemented:
 There are a lot of parameters that can be changed to alter the simulation, e.g.:
 * The bounds of the screen: 
 ** Wrap - When a particle leaves one edge of the screen, it wraps arround the shortest distance
-** Bounce - When a particle hits an edghe of the screen, it is bounced back in the opposite direction
+** Bounce - When a particle hits an edghe of the screen, it bounces back in the opposite direction
 ** None - The screen is only the viewport of the simulation
 * The action between particles on collission:
 ** None - Particles won't collide 
