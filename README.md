@@ -30,11 +30,13 @@ Development is currently done in Ubuntu 12.04 and the following packages are req
 ## Compiling 
 Browse to the folder you just checked out and run the following command
 > make
+
 Everything should go fine and after the make command completes, an executable named particles_01 should be available. 
 
 ## Starting the application
 Simply type 
 > ./particles_01
+
 in your shell and some logging should appear followd by the main screen with lots of particles in in. 
 
 ## Running, pausing and terminating the simulator
