@@ -35,7 +35,9 @@ static struct Particle *particles;
 static int win_num = -1;
 
 enum STATES state = PAUSED;
+#if TRACE
 enum TRACES traces = TRACES_ON;
+#endif
 enum INFO info = INFO_ON;
 #if DEBUG_TIMING
 enum DEBUG debug = DEBUG_ON;
@@ -128,11 +130,13 @@ static void keyboard(unsigned char key, int x, int y)
             }
         }
             break;
+#if TRACE
         case 't':
         {
             traces = (traces == TRACES_OFF ? TRACES_ON : TRACES_OFF);
         }
             break;
+#endif
         case 'i':
         {
             info = (info == INFO_OFF ? INFO_ON : INFO_OFF);

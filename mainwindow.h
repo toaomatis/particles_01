@@ -9,6 +9,7 @@
 #define MAINWINDOW_H_
 
 #define DEBUG_TIMING (0)
+#define TRACE (0)
 
 extern const float WIN_WIDTH_F;
 extern const float WIN_HEIGHT_F;
@@ -17,12 +18,12 @@ enum STATES
 {
     RUNNING, PAUSED, STOPPED
 };
-
+#if TRACE
 enum TRACES
 {
     TRACES_ON, TRACES_OFF
 };
-
+#endif
 enum INFO
 {
     INFO_ON, INFO_OFF
