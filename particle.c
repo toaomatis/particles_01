@@ -26,7 +26,7 @@ const double CONST_RESTITUTION = 0.85f;
 const double CONST_VMIN = 1E-20;
 const int CONST_COLLISION = 1;
 const int NUM_PARTICLES = 250;
-const int TRACE_LENGTH = 10;
+const int TRACE_LENGTH = 1000;
 
 static void init(void);
 
@@ -315,27 +315,31 @@ int particle_move(struct Particle *a)
 
 void particle_draw_trace(struct Particle *a)
 {
+#if TRACE
 #if MUTEX
     pthread_mutex_lock(&(a->mutex));
 #endif
-#if TRACE
     int idx;
-    glBegin(GL_POINTS);
     glColor4f(a->color.r, a->color.g, a->color.b, a->color.a);
-    for (idx = 0; idx < TRACE_LENGTH; idx++)
+    glBegin(GL_LINES);
+    for (idx = 0; idx < TRACE_LENGTH - 1; idx++)
     {
         int trace_idx = (a->trace_idx + idx) % TRACE_LENGTH;
-        if (a->trace[trace_idx].init != 0)
+        int trace_idx_next = (a->trace_idx + idx + 1) % TRACE_LENGTH;
+        if ((a->trace[trace_idx].init != 0) &&  (a->trace[trace_idx_next].init != 0))
         {
             float x = a->trace[trace_idx].x;
             float y = a->trace[trace_idx].y;
             glVertex2f(x, y);
+            x = a->trace[trace_idx_next].x;
+            y = a->trace[trace_idx_next].y;
+            glVertex2f(x, y);
         }
     }
     glEnd();
-#endif
 #if MUTEX
     pthread_mutex_unlock(&(a->mutex));
+#endif
 #endif
 }
 

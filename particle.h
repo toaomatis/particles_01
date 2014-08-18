@@ -10,6 +10,8 @@
 
 #define MUTEX (0)
 
+#include "mainwindow.h"
+
 enum BOUNDS
 {
     WRAP, BOUNCE, NONE

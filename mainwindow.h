@@ -9,7 +9,7 @@
 #define MAINWINDOW_H_
 
 #define DEBUG_TIMING (0)
-#define TRACE (0)
+#define TRACE (1)
 
 extern const float WIN_WIDTH_F;
 extern const float WIN_HEIGHT_F;
