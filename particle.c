@@ -76,6 +76,7 @@ int particle_interact(struct Particle *a, struct Particle *b)
     /* Detect center of interaction */
     double p = b->x - a->x;
     double q = b->y - a->y;
+    double r = b->z - a->z;
     if (CONST_BOUND == WRAP)
     {
         /* Wrap around, use shortest distance */
@@ -309,6 +310,7 @@ int particle_move(struct Particle *a)
 #if TRACE
     a->trace[a->trace_idx].x = a->x;
     a->trace[a->trace_idx].y = a->y;
+    a->trace[a->trace_idx].z = a->z;
     a->trace[a->trace_idx].init = 1;
     a->trace_idx = (a->trace_idx + 1) % TRACE_LENGTH;
 #endif
@@ -335,10 +337,12 @@ void particle_draw_trace(struct Particle *a)
         {
             float x = a->trace[trace_idx].x;
             float y = a->trace[trace_idx].y;
-            glVertex2f(x, y);
+            float z = a->trace[trace_idx].z;
+            glVertex3f(x, y, z);
             x = a->trace[trace_idx_next].x;
             y = a->trace[trace_idx_next].y;
-            glVertex2f(x, y);
+            z = a->trace[trace_idx_next].z;
+            glVertex3f(x, y, z);
         }
     }
     glEnd();
@@ -364,6 +368,7 @@ static void init(void)
         particles[idx].m = CONST_MASS;
         particles[idx].vx = get_random_float(0.0f, CONST_SPEED);
         particles[idx].vy = get_random_float(0.0f, CONST_SPEED);
+        particles[idx].vz = get_random_float(0.0f, CONST_SPEED);
         particles[idx].color.r = get_random_float(0.5f, 1.0f);
         particles[idx].color.g = get_random_float(0.5f, 1.0f);
         particles[idx].color.b = get_random_float(0.5f, 1.0f);
@@ -377,6 +382,7 @@ static void init(void)
         {
             particles[idx].trace[ndx].x = -1.0f;
             particles[idx].trace[ndx].y = -1.0f;
+            particles[idx].trace[ndx].z = -1.0f;
             particles[idx].trace[ndx].init = 0;
         }
 #endif

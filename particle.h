@@ -30,6 +30,7 @@ struct Particle_Trace
     int init;
     float x;
     float y;
+    float z;
 };
 #endif
 struct Particle
@@ -44,6 +45,7 @@ struct Particle
     float m;
     float vx;
     float vy;
+    float vz;
     struct Particle_Color color;
 #if TRACE
     int trace_idx;
