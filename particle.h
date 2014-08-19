@@ -8,7 +8,7 @@
 #ifndef PARTICLE_H_
 #define PARTICLE_H_
 
-#define MUTEX (0)
+#define MUTEX (1)
 
 #include "mainwindow.h"
 
@@ -39,6 +39,7 @@ struct Particle
     int hit;
     float x;
     float y;
+    float z;
     float r;
     float m;
     float vx;

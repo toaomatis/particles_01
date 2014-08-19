@@ -13,6 +13,7 @@
 
 extern const float WIN_WIDTH_F;
 extern const float WIN_HEIGHT_F;
+extern const float WIN_DEPTH_F;
 
 enum STATES
 {

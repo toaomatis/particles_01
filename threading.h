@@ -11,7 +11,7 @@
 void start_thread_pool(void);
 void stop_thread_pool(void);
 
-#define MUTEX_COND (0)
+#define MUTEX_COND (1)
 #define NUM_THREAD_POOLS (1)
 
 #if MUTEX_COND

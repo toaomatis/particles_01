@@ -20,14 +20,20 @@
 #include "particle.h"
 #include "threading.h"
 
-const int WIN_WIDTH_I = 1024;
+const int WIN_WIDTH_I = 768;
 const int WIN_HEIGHT_I = 768;
-const float WIN_WIDTH_F = 1024.0f;
+const float WIN_WIDTH_F = 768.0f;
 const float WIN_HEIGHT_F = 768.0f;
+const float WIN_DEPTH_F = 1.0f;
+
+float scale_width = 768.0f;
+float scale_height = 768.0f;
+float scale = 1.0f;
 
 static int init(int argc, char **argv);
 static void init_callbacks(void);
 static void render_scene_cb(void);
+static void displayReshape(int w, int h);
 
 static void keyboard(unsigned char key, int x, int y);
 
@@ -58,7 +64,7 @@ static int init(int argc, char **argv)
 {
     GLenum res;
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
     glutInitWindowSize(WIN_WIDTH_I, WIN_HEIGHT_I);
     glutInitWindowPosition(100, 100);
     win_num = glutCreateWindow("Tutorial 01");
@@ -73,18 +79,31 @@ static int init(int argc, char **argv)
         return -1;
     }
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
+    glViewport(0, 0, WIN_WIDTH_I, WIN_HEIGHT_I);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0.0f, WIN_WIDTH_F, WIN_HEIGHT_F, 0.0f, 0.0f, 1.0f);
     glMatrixMode(GL_MODELVIEW);
-    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
 
     particles = particle();
 
     start_thread_pool();
 
     return 0;
+}
+
+static void displayReshape(int w, int h)
+{
+    // If the display is re-sized in any way, the cube is redrawn
+    // so that it fits the display properly. Try it!
+
+    glViewport(0, 0, w, h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    //glOrtho(-1.0f * scale_width, scale_width, -1.0f * scale_height, scale_height, -10.0f, 10.0f);
+    //glOrtho(-1.0f * scale_width, scale_width, -1.0f * scale_height, scale_height, -10.0f, 10.0f);
+    glOrtho(-1.0f * WIN_WIDTH_F, WIN_WIDTH_F, -1.0f * WIN_HEIGHT_F, WIN_HEIGHT_F, -10.0f, 10.0f);
+    glMatrixMode(GL_MODELVIEW);
 }
 
 static void animate()
@@ -105,6 +124,7 @@ static void init_callbacks()
     glutDisplayFunc(render_scene_cb);
     glutKeyboardFunc(keyboard);
     glutIdleFunc(animate);
+    glutReshapeFunc(displayReshape);
 }
 
 static void keyboard(unsigned char key, int x, int y)
@@ -149,12 +169,24 @@ static void keyboard(unsigned char key, int x, int y)
         }
             break;
 #endif
-        default:
+        case '-':
         {
-
+            scale /= 2.0f;
         }
             break;
+        default:
+        case '+':
+        {
+            scale *= 2.0f;
+        }
+            break;
+            {
+
+            }
+            break;
     }
+    scale_width = WIN_WIDTH_F / scale;
+    scale_height = WIN_HEIGHT_F / scale;
 }
 
 static void render_scene_cb()
@@ -165,10 +197,15 @@ static void render_scene_cb()
     int64_t duration = 0;
     clock_gettime(CLOCK_MONOTONIC, &in);
 #endif
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLoadIdentity();
+    //gluLookAt(1.0,1.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0);
+    glScalef(scale, scale, scale);
     for (int i = 0; i < NUM_PARTICLES; i++)
     {
+        glPushMatrix();
         particle_draw(&(particles[i]));
+        glPopMatrix();
 #if TRACE
         if (traces == TRACES_ON)
         {

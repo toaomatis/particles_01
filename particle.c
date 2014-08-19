@@ -26,7 +26,7 @@ const double CONST_RESTITUTION = 0.85f;
 const double CONST_VMIN = 1E-20;
 const int CONST_COLLISION = 1;
 const int NUM_PARTICLES = 250;
-const int TRACE_LENGTH = 1000;
+const int TRACE_LENGTH = 100;
 
 static void init(void);
 
@@ -46,13 +46,18 @@ void particle_draw(struct Particle *a)
 #if MUTEX
     pthread_mutex_lock(&(a->mutex));
 #endif
-    glBegin(GL_LINE_LOOP);
     glColor4f(a->color.r, a->color.g, a->color.b, a->color.a);
+#if 0
+    glBegin(GL_LINE_LOOP);
     for (float i = 0; i <= (2 * M_PI) + STEP_SIZE; i += STEP_SIZE)
     {
         glVertex2f(a->x + (sin(i) * a->r), a->y + (cos(i) * a->r));
     }
     glEnd();
+#else
+    glTranslatef(a->x, a->y, a->z);
+    glutSolidSphere(a->r, 10, 10);
+#endif
 #if MUTEX
     pthread_mutex_unlock(&(a->mutex));
 #endif
@@ -350,10 +355,11 @@ static void init(void)
     particles = malloc(NUM_PARTICLES * size_of);
     for (idx = 0; idx < NUM_PARTICLES; idx++)
     {
-        const float r = get_random_float(2.0f, 5.0f);
+        const float r = 3.5f;//get_random_float(2.0f, 5.0f);
         particles[idx].pid = idx;
-        particles[idx].x = get_random_float(0.0f + r, WIN_WIDTH_F - r);
-        particles[idx].y = get_random_float(0.0f + r, WIN_HEIGHT_F - r);
+        particles[idx].x = get_random_float(-WIN_WIDTH_F + r, WIN_WIDTH_F - r);
+        particles[idx].y = get_random_float(-WIN_HEIGHT_F + r, WIN_HEIGHT_F - r);
+        particles[idx].z = get_random_float(-WIN_DEPTH_F + r, WIN_DEPTH_F - r);
         particles[idx].r = r;
         particles[idx].m = CONST_MASS;
         particles[idx].vx = get_random_float(0.0f, CONST_SPEED);
