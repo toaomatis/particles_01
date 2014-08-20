@@ -11,6 +11,7 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
+#include "coll3d.h"
 #include "particle.h"
 #include "helper.h"
 #include "mainwindow.h"
@@ -69,6 +70,10 @@ int particle_interact(struct Particle *a, struct Particle *b)
     pthread_mutex_lock(&(a->mutex));
     pthread_mutex_lock(&(b->mutex));
 #endif
+    int err = -1;
+#if 0
+    collision3D(a, b, &err);
+#else
     if ((a->alive != 1) || (b->alive != 1))
     {
         return -1;
@@ -97,7 +102,7 @@ int particle_interact(struct Particle *a, struct Particle *b)
             q += WIN_HEIGHT_F;
         }
     }
-    const double h2 = (p * p) + (q * q);
+    const double h2 = (p * p) + (q * q) + (r * r);
     if (CONST_COLLISION != 0)
     {
         /* Collisions enabled */
@@ -153,12 +158,13 @@ int particle_interact(struct Particle *a, struct Particle *b)
                 /* Normalized impact direction */
                 p /= h;
                 q /= h;
+                r /= h;
                 /* Impact velocity */
-                v1 = a->vx * p + a->vy * q;
-                v2 = b->vx * p + b->vy * q;
+                v1 = a->vx * p + a->vy * q + a->vz * r;
+                v2 = b->vx * p + b->vy * q + b->vz * r;
                 /* Remainder velocity */
-                r1 = a->vx * q - a->vy * p;
-                r2 = b->vx * q - b->vy * p;
+                r1 = a->vx * q - a->vy * p - a->vz * r;
+                r2 = b->vx * q - b->vy * p - b->vz * r;
                 if (v1 < v2)
                 {
 #if MUTEX
@@ -190,20 +196,23 @@ int particle_interact(struct Particle *a, struct Particle *b)
     }
     if (CONST_MASS_GRAVITY != 0 && h2 > 1e-10 && (a->hit != 1) && (b->hit != 1))
     {
-        /* When gravity is enabled, "drop" particles to bottom */
+        /* When gravity is enabled, "drop" particles to each other */
         double dv;
         dv = CONST_MASS_GRAVITY * b->m / h2;
         a->vx += dv * p;
         a->vy += dv * q;
+        a->vz += dv * r;
         dv = CONST_MASS_GRAVITY * a->m / h2;
         b->vx -= dv * p;
         b->vy -= dv * q;
+        b->vz -= dv * r;
     }
+#endif
 #if MUTEX
     pthread_mutex_unlock(&(b->mutex));
     pthread_mutex_unlock(&(a->mutex));
 #endif
-    return 0;
+    return err;
 }
 
 int particle_move(struct Particle *a)
@@ -213,6 +222,7 @@ int particle_move(struct Particle *a)
 #endif
     a->x += a->vx;
     a->y += a->vy;
+    a->z += a->vz;
     if (CONST_BOUND != NONE)
     {
         /* The particles should react to the screen boundary */
@@ -333,7 +343,7 @@ void particle_draw_trace(struct Particle *a)
     {
         int trace_idx = (a->trace_idx + idx) % TRACE_LENGTH;
         int trace_idx_next = (a->trace_idx + idx + 1) % TRACE_LENGTH;
-        if ((a->trace[trace_idx].init != 0) &&  (a->trace[trace_idx_next].init != 0))
+        if ((a->trace[trace_idx].init != 0) && (a->trace[trace_idx_next].init != 0))
         {
             float x = a->trace[trace_idx].x;
             float y = a->trace[trace_idx].y;
@@ -359,7 +369,7 @@ static void init(void)
     particles = malloc(NUM_PARTICLES * size_of);
     for (idx = 0; idx < NUM_PARTICLES; idx++)
     {
-        const float r = 3.5f;//get_random_float(2.0f, 5.0f);
+        const float r = 3.5f; //get_random_float(2.0f, 5.0f);
         particles[idx].pid = idx;
         particles[idx].x = get_random_float(-WIN_WIDTH_F + r, WIN_WIDTH_F - r);
         particles[idx].y = get_random_float(-WIN_HEIGHT_F + r, WIN_HEIGHT_F - r);

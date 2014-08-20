@@ -10,6 +10,7 @@
 
 #define MUTEX (1)
 
+#include <pthread.h>
 #include "mainwindow.h"
 
 enum BOUNDS
@@ -57,6 +58,7 @@ struct Particle
 };
 
 extern const int NUM_PARTICLES;
+extern const double CONST_RESTITUTION;
 
 struct Particle* particle();
 void particle_draw(struct Particle *particle);
