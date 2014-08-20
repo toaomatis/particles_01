@@ -376,9 +376,9 @@ static void init(void)
         particles[idx].z = get_random_float(-WIN_DEPTH_F + r, WIN_DEPTH_F - r);
         particles[idx].r = r;
         particles[idx].m = CONST_MASS;
-        particles[idx].vx = get_random_float(0.0f, CONST_SPEED);
-        particles[idx].vy = get_random_float(0.0f, CONST_SPEED);
-        particles[idx].vz = get_random_float(0.0f, CONST_SPEED);
+        particles[idx].vx = get_random_float(-1.0f * CONST_SPEED, CONST_SPEED);
+        particles[idx].vy = get_random_float(-1.0f * CONST_SPEED, CONST_SPEED);
+        particles[idx].vz = get_random_float(-1.0f * CONST_SPEED, CONST_SPEED);
         particles[idx].color.r = get_random_float(0.5f, 1.0f);
         particles[idx].color.g = get_random_float(0.5f, 1.0f);
         particles[idx].color.b = get_random_float(0.5f, 1.0f);
