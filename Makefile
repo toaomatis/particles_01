@@ -1,4 +1,4 @@
-SOURCES = main.c mainwindow.c particle.c helper.c threading.c
+SOURCES = main.c mainwindow.c particle.c helper.c threading.c coll3d.c
 OBJS = ${SOURCES:.c=.o}
 
 DEBUG_CFLAGS = -O0 -g
